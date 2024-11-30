@@ -46,7 +46,6 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
 class SpaceCasesBot(commands.Bot):
     def __init__(self, environment: Environment):
         intents = discord.Intents.default()
-        intents.message_content = True
         super().__init__(
             command_prefix="", intents=intents, tree_cls=SpaceCasesCommandTree
         )
