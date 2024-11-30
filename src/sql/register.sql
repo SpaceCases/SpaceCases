@@ -1,0 +1,1 @@
+INSERT INTO "users" (id, balance) VALUES (($1), 0) ON CONFLICT DO NOTHING RETURNING id;

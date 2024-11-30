@@ -1,0 +1,8 @@
+spacecases-common
+discord.py
+python-dotenv
+asyncpg
+requests
+mypy
+types-requests
+marisa-trie
