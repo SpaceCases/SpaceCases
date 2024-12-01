@@ -42,7 +42,7 @@ class User(commands.Cog):
         amount="Amount of balance to transfer", recipient="Recipient of the balance"
     )
     async def transfer(
-        self, interaction: discord.Interaction, amount: float, recipient: discord.User
+        self, interaction: discord.Interaction, amount: str, recipient: discord.User
     ):
         await transfer(self.bot, interaction, amount, recipient)
 

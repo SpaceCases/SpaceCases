@@ -18,10 +18,10 @@ class Database:
         return Database(pool)
 
     def __init__(self, pool: asyncpg.Pool):
-        self._pool = pool
+        self.pool = pool
 
     async def _execute(self, query: str, *params):
-        async with self._pool.acquire() as connection:
+        async with self.pool.acquire() as connection:
             await connection.execute(query, *params)
 
     async def execute_from_file(self, filename: str, *params):
@@ -32,7 +32,7 @@ class Database:
         )
 
     async def _fetch(self, query: str, *params):
-        async with self._pool.acquire() as connection:
+        async with self.pool.acquire() as connection:
             result = await connection.fetch(query, *params)
         return result
 
@@ -45,5 +45,5 @@ class Database:
         return val
 
     async def close(self):
-        await self._pool.close()
+        await self.pool.close()
         logger.info("Closed database")
