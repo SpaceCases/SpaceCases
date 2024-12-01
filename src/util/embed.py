@@ -86,7 +86,7 @@ async def yes_no_embed(
 
     async def timeout_callback():
         if responded:
-            return 
+            return
         # Edit the message to indicate timeout and remove buttons
         message = await interaction.original_response()
         # Edit the message to indicate timeout and remove buttons

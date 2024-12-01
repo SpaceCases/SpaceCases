@@ -105,7 +105,7 @@ class SpaceCasesBot(commands.Bot):
             self.tree.copy_global_to(guild=guild)
             synced = await self.tree.sync(guild=guild)
             logger.info(
-                f"Successfully synced the following commands for guild {self.environment.test_guild}: {synced}"
+                f"Successfully synced the following commands for {self.environment.test_guild}: {synced}"
             )
         else:
             logger.info(f"Syncing commands globally...")
@@ -120,6 +120,34 @@ class SpaceCasesBot(commands.Bot):
     async def on_ready(self):
         logger.info(f"Bot is logged in as {self.user}")
         logger.info("Bot is ready to receive commands - press CTRL+C to stop")
+
+    def get_welcome_embed(self) -> discord.Embed:
+        e = discord.Embed(
+            description=f"""Hello! My name is **{self.user.name}**
+
+I am CS:GO case unboxing and economy bot. With me you can:
+• Unbox your dream skins
+• Trade them with other users
+• Take a risk and upgrade them
+• And more coming soon
+Use {self.get_slash_command_mention_string('register')} to get started!
+
+Enjoy! - [Spacerulerwill](https://github.com/Spacerulerwill)""",
+            color=discord.Color.dark_theme(),
+        )
+        e.set_thumbnail(url=self.user.display_avatar.url)
+        return e
+
+    async def on_guild_join(self, guild: discord.Guild):
+        logger.info(f"Joined new guild {guild.name} ({guild.id})")
+        if (
+            guild.system_channel
+            and guild.system_channel.permissions_for(guild.me).send_messages
+        ):
+            await guild.system_channel.send(embed=self.get_welcome_embed())
+        else:
+            if guild.owner:
+                await guild.owner.send(embed=self.get_welcome_embed())
 
     async def _load_cogs(self):
         for filename in os.listdir("src/cogs"):
