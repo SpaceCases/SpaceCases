@@ -57,6 +57,7 @@ async def yes_no_embed(
     on_no,
     timeout: Optional[float] = 30,
 ) -> None:
+    responded = False
     embed = discord.Embed(description=msg_content, color=discord.Color.dark_theme())
 
     # Define buttons
@@ -65,21 +66,27 @@ async def yes_no_embed(
 
     # Callback for "Yes" button
     async def yes_button_callback(interaction: discord.Interaction):
+        nonlocal responded
         if interaction.user != interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
         await on_yes(interaction)
+        responded = True
 
     # Callback for "No" button
     async def no_button_callback(interaction: discord.Interaction):
+        nonlocal responded
         if interaction.user != interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
         await on_no(interaction)
+        responded = True
 
     # Attach callbacks to buttons
     yes_button.callback = yes_button_callback
     no_button.callback = no_button_callback
 
     async def timeout_callback():
+        if responded:
+            return 
         # Edit the message to indicate timeout and remove buttons
         message = await interaction.original_response()
         # Edit the message to indicate timeout and remove buttons
