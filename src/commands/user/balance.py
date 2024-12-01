@@ -18,7 +18,7 @@ async def balance(
             title=f"{user.display_name}'s Balance",
             color=discord.Color.dark_theme(),
         )
-        e.set_thumbnail(url=interaction.user.display_avatar.url)
+        e.set_thumbnail(url=user.display_avatar.url)
         e.add_field(name="Current Balance", value=currency_str_format(balance))
         await interaction.response.send_message(embed=e)
     else:
