@@ -9,3 +9,4 @@ async def register(bot: SpaceCasesBot, interaction: discord.Interaction):
         await send_err_embed(interaction, "You are **already** registered!")
     else:
         await send_success_embed(interaction, "You are **now** registered!")
+        bot.user_count += 1

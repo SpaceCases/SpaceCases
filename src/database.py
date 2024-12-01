@@ -27,9 +27,12 @@ class Database:
     async def execute_from_file(self, filename: str, *params):
         with open(os.path.join(SQL_QUERIES_DIRECTORY, filename)) as f:
             await self._execute(f.read(), *params)
-        logger.debug(
-            f"Ran execute query from file: '{filename}' with params: {", ".join(map(str, params))}"
-        )
+        if len(params) == 0:
+            logger.debug(f"Ran execute query from file: '{filename}'")
+        else:
+            logger.debug(
+                f"Ran execute query from file: '{filename}' with params: {', '.join(map(str, params))}"
+            )
 
     async def _fetch(self, query: str, *params):
         async with self.pool.acquire() as connection:
@@ -39,9 +42,12 @@ class Database:
     async def fetch_from_file(self, filename: str, *params):
         with open(os.path.join(SQL_QUERIES_DIRECTORY, filename)) as f:
             val = await self._fetch(f.read(), *params)
-        logger.debug(
-            f"Ran fetch query from file: '{filename}' with params: {', '.join(map(str, params))}"
-        )
+        if len(params) == 0:
+            logger.debug(f"Ran fetch query from file: '{filename}'")
+        else:
+            logger.debug(
+                f"Ran fetch query from file: '{filename}' with params: {', '.join(map(str, params))}"
+            )
         return val
 
     async def close(self):

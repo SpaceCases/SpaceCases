@@ -55,6 +55,8 @@ class SpaceCasesBot(commands.Bot):
         self.skin_name_trie = Trie()
         self.environment = environment
         self.command_ids: dict[str, int] = {}
+        self.status_int = 0
+        self.user_count = 0
 
     def refresh_skin_data(self):
         logger.info("Refreshing skin data...")
@@ -85,6 +87,19 @@ class SpaceCasesBot(commands.Bot):
     async def refresh_skin_data_loop(self):
         self.refresh_skin_data()
 
+    @tasks.loop(seconds=10)
+    async def bot_status_loop(self):
+        self.status_int = (self.status_int + 1) % 2
+        match self.status_int:
+            case 0:
+                await self.change_presence(activity=discord.Game(name="/register"))
+            case 1:
+                await self.change_presence(
+                    activity=discord.Game(
+                        name=f"{self.user_count} users | {len(self.guilds)} servers"
+                    )
+                )
+
     async def close(self):
         await self.db.close()
         logger.info(f"Goodbye from {self.user}")
@@ -97,6 +112,7 @@ class SpaceCasesBot(commands.Bot):
             self.environment.db_host,
             self.environment.db_port,
         )
+        self.user_count = (await self.db.fetch_from_file("count_users.sql"))[0]["count"]
         await self._load_cogs()
         if self.environment.test_guild is not None:
             guild = discord.Object(id=self.environment.test_guild)
@@ -119,6 +135,7 @@ class SpaceCasesBot(commands.Bot):
         self.refresh_skin_data_loop.start()
 
     async def on_ready(self):
+        self.bot_status_loop.start()
         logger.info(f"Bot is logged in as {self.user}")
         logger.info("Bot is ready to receive commands - press CTRL+C to stop")
 

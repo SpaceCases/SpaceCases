@@ -30,6 +30,7 @@ async def close(bot: SpaceCasesBot, interaction: discord.Interaction):
                 "You have successfully **deleted** your account"
             )
             await interaction.response.edit_message(embed=new_embed, view=None)
+            bot.user_count -= 1
         else:
             new_embed = create_err_embed("Your account is **already** deleted")
             await interaction.response.edit_message(embed=new_embed, view=None)
