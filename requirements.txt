@@ -2,6 +2,7 @@ spacecases-common
 discord.py
 python-dotenv
 asyncpg
+asyncpg-stubs
 requests
 mypy
 types-requests

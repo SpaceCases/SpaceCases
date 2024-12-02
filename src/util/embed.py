@@ -61,8 +61,8 @@ async def yes_no_embed(
     embed = discord.Embed(description=msg_content, color=discord.Color.dark_theme())
 
     # Define buttons
-    yes_button = Button(label="Yes", style=discord.ButtonStyle.green)
-    no_button = Button(label="No", style=discord.ButtonStyle.red)
+    yes_button: Button = Button(label="Yes", style=discord.ButtonStyle.green)
+    no_button: Button = Button(label="No", style=discord.ButtonStyle.red)
 
     # Callback for "Yes" button
     async def yes_button_callback(interaction: discord.Interaction):
@@ -81,8 +81,8 @@ async def yes_no_embed(
         responded = True
 
     # Attach callbacks to buttons
-    yes_button.callback = yes_button_callback
-    no_button.callback = no_button_callback
+    yes_button.callback = yes_button_callback  # type: ignore[assignment]
+    no_button.callback = no_button_callback  # type: ignore[assignment]
 
     async def timeout_callback():
         if responded:
@@ -95,7 +95,7 @@ async def yes_no_embed(
 
     # Create a view and add buttons
     view = View(timeout=timeout)
-    view.on_timeout = timeout_callback
+    view.on_timeout = timeout_callback  # type: ignore[assignment]
     view.add_item(yes_button)
     view.add_item(no_button)
 

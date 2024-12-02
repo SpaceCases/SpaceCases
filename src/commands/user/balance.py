@@ -9,20 +9,22 @@ async def balance(
     bot: SpaceCasesBot, interaction: discord.Interaction, user: Optional[discord.User]
 ):
     if user is None:
-        user = interaction.user
+        target_user = interaction.user
+    else:
+        target_user = user
 
-    rows = await bot.db.fetch_from_file("balance.sql", user.id)
+    rows = await bot.db.fetch_from_file("balance.sql", target_user.id)
     if len(rows) > 0:
         balance = rows[0]["balance"]
         e = discord.Embed(
-            title=f"{user.display_name}'s Balance",
+            title=f"{target_user.display_name}'s Balance",
             color=discord.Color.dark_theme(),
         )
-        e.set_thumbnail(url=user.display_avatar.url)
+        e.set_thumbnail(url=target_user.display_avatar.url)
         e.add_field(name="Current Balance", value=currency_str_format(balance))
         await interaction.response.send_message(embed=e)
     else:
-        if user.id == interaction.user.id:
+        if target_user.id == interaction.user.id:
             await send_err_embed(
                 interaction,
                 f"You are **not** registered. Use {bot.get_slash_command_mention_string('register')} to register!",
@@ -30,5 +32,5 @@ async def balance(
         else:
             await send_err_embed(
                 interaction,
-                f"{user.display_name} is **not** registered",
+                f"{target_user.display_name} is **not** registered",
             )

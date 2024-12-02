@@ -26,8 +26,8 @@ async def transfer(
         )
         return
 
-    amount = Decimal(amount)
-    cents = int(amount * 100)
+    decimal_amount = Decimal(amount)
+    cents = int(decimal_amount * 100)
     if cents == 0:
         await send_err_embed(interaction, "You **cannot** transfer **zero** balance")
         return

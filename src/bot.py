@@ -4,10 +4,11 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 from src.logger import logger
-from src.environment import Environment
 from src.database import Database
 from marisa_trie import Trie
 from spacecases_common import Skin
+from collections.abc import Iterable
+from typing import Any, Optional
 
 
 class SpaceCasesCommandTree(app_commands.CommandTree):
@@ -16,10 +17,22 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
         user = interaction.user
         guild = interaction.guild if interaction.guild else "DM"
         # Check if it's a slash command and log the parameters
-        if interaction.type == discord.InteractionType.application_command:
+        if (
+            interaction.type == discord.InteractionType.application_command
+            and interaction.command is not None
+        ):
             command_name = interaction.command.name
-            options = interaction.data.get("options", [])
-            parameters = {opt["name"]: opt["value"] for opt in options}
+            if interaction.data is not None:
+                options = interaction.data.get("options", [])
+            else:
+                options = []
+
+            parameters: Any
+            if isinstance(options, Iterable):
+                parameters = {opt["name"]: opt["value"] for opt in options}
+            else:
+                parameters = options
+
             logger.debug(
                 f"Slash command '{command_name}' invoked by {user} ({user.id}) in {guild} with parameters: {parameters}"
             )
@@ -44,19 +57,20 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
 
 
 class SpaceCasesBot(commands.Bot):
-    def __init__(self, environment: Environment):
+    def __init__(self, pool: Database, test_guild: Optional[str]):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(
             command_prefix="", intents=intents, tree_cls=SpaceCasesCommandTree
         )
+        self.db = pool
         self.skin_data: dict[str, Skin] = {}
         self.all_unformatted_names: list[str] = []
         self.skin_name_trie = Trie()
-        self.environment = environment
         self.command_ids: dict[str, int] = {}
         self.status_int = 0
         self.user_count = 0
+        self.test_guild = test_guild
 
     def refresh_skin_data(self):
         logger.info("Refreshing skin data...")
@@ -101,28 +115,18 @@ class SpaceCasesBot(commands.Bot):
                 )
 
     async def close(self):
-        await self.db.close()
         logger.info(f"Goodbye from {self.user}")
 
     async def setup_hook(self):
-        self.db = await Database.create(
-            self.environment.db_user,
-            self.environment.db_password,
-            self.environment.db_name,
-            self.environment.db_host,
-            self.environment.db_port,
-        )
         self.user_count = (await self.db.fetch_from_file("count_users.sql"))[0]["count"]
         await self._load_cogs()
-        if self.environment.test_guild is not None:
-            guild = discord.Object(id=self.environment.test_guild)
-            logger.info(
-                f"Syncing commands for guild with id: {self.environment.test_guild}..."
-            )
+        if self.test_guild is not None:
+            guild = discord.Object(id=self.test_guild)
+            logger.info(f"Syncing commands for guild with id: {self.test_guild}...")
             self.tree.copy_global_to(guild=guild)
             synced = await self.tree.sync(guild=guild)
             logger.info(
-                f"Successfully synced the following commands for {self.environment.test_guild}: {synced}"
+                f"Successfully synced the following commands for {self.test_guild}: {synced}"
             )
         else:
             logger.info(f"Syncing commands globally...")
@@ -140,8 +144,12 @@ class SpaceCasesBot(commands.Bot):
         logger.info("Bot is ready to receive commands - press CTRL+C to stop")
 
     def get_welcome_embed(self) -> discord.Embed:
+        if self.user:
+            name = self.user.display_name
+        else:
+            name = "SpaceCases"
         e = discord.Embed(
-            description=f"""Hello! My name is **{self.user.name}**
+            description=f"""Hello! My name is **{name}**
 
 I am CS:GO case unboxing and economy bot. With me you can:
 • Unbox your dream skins
@@ -153,7 +161,8 @@ Use {self.get_slash_command_mention_string('register')} to get started!
 Enjoy! - [Spacerulerwill](https://github.com/Spacerulerwill)""",
             color=discord.Color.dark_theme(),
         )
-        e.set_thumbnail(url=self.user.display_avatar.url)
+        if self.user:
+            e.set_thumbnail(url=self.user.display_avatar.url)
         return e
 
     async def on_guild_join(self, guild: discord.Guild):

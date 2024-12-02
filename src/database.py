@@ -14,6 +14,11 @@ class Database:
         pool = await asyncpg.create_pool(
             user=user, password=password, database=database, host=host, port=port
         )
+
+        if pool is None:
+            logger.error("Database pool is None. Cannot execute queries.")
+            raise ConnectionError("Database connection pool is not established.")
+
         logger.info(f"Connected to database '{database}' as user '{user}'")
         return Database(pool)
 
@@ -53,3 +58,9 @@ class Database:
     async def close(self):
         await self.pool.close()
         logger.info("Closed database")
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb):
+        await self.close()
