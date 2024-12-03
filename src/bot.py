@@ -129,7 +129,7 @@ class SpaceCasesBot(commands.Bot):
                 f"Successfully synced the following commands for {self.test_guild}: {synced}"
             )
         else:
-            logger.info(f"Syncing commands globally...")
+            logger.info("Syncing commands globally...")
             synced = await self.tree.sync()
             logger.info(
                 f"Successfully synced the following commands globally: {synced}"

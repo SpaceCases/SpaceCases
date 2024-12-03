@@ -4,6 +4,7 @@ python-dotenv
 asyncpg
 asyncpg-stubs
 requests
-mypy
 types-requests
 marisa-trie
+mypy
+ruff
