@@ -1,1 +1,1 @@
-INSERT INTO "users" (id, balance) VALUES (($1), 0) ON CONFLICT DO NOTHING RETURNING id;
+INSERT INTO "users" (id, last_claim, balance) VALUES (($1), '0001-01-01', 0) ON CONFLICT DO NOTHING RETURNING id;

@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY,
-    balance BIGINT
+    last_claim DATE NOT NULL,
+    balance BIGINT NOT NULL
 );

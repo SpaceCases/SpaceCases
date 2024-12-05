@@ -2,7 +2,6 @@ import os
 import asyncpg
 from src.logger import logger
 
-INIT_SCRIPTS_DIRECTORY = os.path.join("src", "sql", "init")
 SQL_QUERIES_DIRECTORY = os.path.join("src", "sql")
 
 

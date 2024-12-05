@@ -46,6 +46,5 @@ class User(commands.Cog):
     ):
         await transfer(self.bot, interaction, amount, recipient)
 
-
 async def setup(bot: SpaceCasesBot):
     await bot.add_cog(User(bot))
