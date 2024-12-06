@@ -1,6 +1,7 @@
 import discord
 from typing import Optional
 from discord.ui import Button, View
+from spacecases_common import Rarity
 
 
 def create_embed(
@@ -103,21 +104,7 @@ async def yes_no_embed(
     await interaction.response.send_message(embed=embed, view=view)
 
 
-def get_grade_embed_colour(grade: str):
-    match grade:
-        case "Consumer Grade":
-            return 0xB0C3D9
-        case "Industrial Grade":
-            return 0x5E98D9
-        case "Mil-Spec Grade" | "High Grade":
-            return 0x4B69FF
-        case "Restricted" | "Remarkable":
-            return 0x8847FF
-        case "Classified" | "Exotic":
-            return 0xD32CE6
-        case "Covert" | "Extraordinary":
-            return 0xEB4B4B
-        case "Contraband":
-            return 0xE4AE39
-        case _:
-            raise ValueError(f"Invalid grade: {grade}")
+def get_rarity_embed_color(rarity: Rarity):
+    return [0xB0C3D9, 0x5E98D9, 0x4B69FF, 0x8847FF, 0xD32CE6, 0xEB4B4B, 0xE4AE39][
+        rarity.value
+    ]

@@ -6,7 +6,7 @@ from discord import app_commands
 from src.logger import logger
 from src.database import Database
 from marisa_trie import Trie
-from spacecases_common import Skin
+from spacecases_common import ItemMetadatum, StickerMetadatum, SkinMetadatum, Rarity
 from collections.abc import Iterable
 from typing import Any, Optional
 
@@ -64,7 +64,7 @@ class SpaceCasesBot(commands.Bot):
             command_prefix="", intents=intents, tree_cls=SpaceCasesCommandTree
         )
         self.db = pool
-        self.skin_data: dict[str, Skin] = {}
+        self.item_metadata: dict[str, ItemMetadatum] = {}
         self.all_unformatted_names: list[str] = []
         self.skin_name_trie = Trie()
         self.command_ids: dict[str, int] = {}
@@ -72,34 +72,51 @@ class SpaceCasesBot(commands.Bot):
         self.user_count = 0
         self.test_guild = test_guild
 
-    def refresh_skin_data(self):
-        logger.info("Refreshing skin data...")
-        new_skin_data = {}
+    def refresh_item_metadata(self):
+        # get new skin metadata
+        logger.info("Refreshing skin metadata...")
+        new_item_metadata = {}
         new_all_unformatted_names = []
         raw_json = requests.get(
-            "https://assets.spacecases.xyz/generated/skin_data.json"
+            "https://assets.spacecases.xyz/generated/skin_metadata.json"
         ).json()
         for unformatted_name, datum in raw_json.items():
             new_all_unformatted_names.append(unformatted_name)
-            skin = Skin(
+            skin_metadatum = SkinMetadatum(
                 datum["formatted_name"],
-                datum["description"],
+                Rarity(datum["rarity"]),
+                datum["price"],
                 datum["image_url"],
-                datum["grade"],
+                datum["description"],
                 datum["min_float"],
                 datum["max_float"],
-                datum["price"],
             )
-            new_skin_data[unformatted_name] = skin
+            new_item_metadata[unformatted_name] = skin_metadatum
+        logger.info("Skin metadata refreshed")
+        # get new sticker metadata
+        logger.info("Refreshing sticker metadata...")
+        raw_json = requests.get(
+            "https://assets.spacecases.xyz/generated/sticker_metadata.json"
+        ).json()
+        for unformatted_name, datum in raw_json.items():
+            new_all_unformatted_names.append(unformatted_name)
+            sticker_metadatum = StickerMetadatum(
+                datum["formatted_name"],
+                Rarity(datum["rarity"]),
+                datum["price"],
+                datum["image_url"],
+            )
+            new_item_metadata[unformatted_name] = sticker_metadatum
+        # update data
         new_skin_name_trie = Trie(new_all_unformatted_names)
-        self.skin_data = new_skin_data
+        self.item_metadata = new_item_metadata
         self.all_unformatted_names = new_all_unformatted_names
         self.skin_name_trie = new_skin_name_trie
-        logger.info("Skin data refreshed")
+        logger.info("Sticker metadata refreshed")
 
     @tasks.loop(minutes=15)
-    async def refresh_skin_data_loop(self):
-        self.refresh_skin_data()
+    async def refresh_item_metadata_loop(self):
+        self.refresh_item_metadata()
 
     @tasks.loop(seconds=10)
     async def bot_status_loop(self):
@@ -136,7 +153,7 @@ class SpaceCasesBot(commands.Bot):
             )
         for command in synced:
             self.command_ids[command.name] = command.id
-        self.refresh_skin_data_loop.start()
+        self.refresh_item_metadata_loop.start()
 
     async def on_ready(self):
         self.bot_status_loop.start()
