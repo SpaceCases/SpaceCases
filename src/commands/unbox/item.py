@@ -25,7 +25,7 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str):
                 color=get_rarity_embed_color(item_metadata.rarity),
             )
             e.add_field(name="Price", value=currency_str_format(item_metadata.price))
-            e.add_field(name="Rarity", value=item_metadata.get_rarity_string())
+            e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_skin())
             e.add_field(
                 name="Float Range",
                 value=f"{item_metadata.min_float:.2f} - {item_metadata.max_float:.2f}",
@@ -37,7 +37,7 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str):
                 color=get_rarity_embed_color(item_metadata.rarity),
             )
             e.add_field(name="Price", value=currency_str_format(item_metadata.price))
-            e.add_field(name="Rarity", value=item_metadata.get_rarity_string())
+            e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_regular_item())
             e.set_image(url=item_metadata.image_url)
 
     await interaction.response.send_message(embed=e)
