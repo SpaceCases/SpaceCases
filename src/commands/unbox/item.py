@@ -17,28 +17,27 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str):
         await send_err_embed(interaction, f"No item exists with name: `{name}`")
         return
     item_metadata = bot.item_metadata[unformatted_name]
-    match item_metadata:
-        case SkinMetadatum():
-            e = discord.Embed(
-                title=item_metadata.formatted_name,
-                description=item_metadata.description,
-                color=get_rarity_embed_color(item_metadata.rarity),
-            )
-            e.add_field(name="Price", value=currency_str_format(item_metadata.price))
-            e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_skin())
-            e.add_field(
-                name="Float Range",
-                value=f"{item_metadata.min_float:.2f} - {item_metadata.max_float:.2f}",
-            )
-            e.set_image(url=item_metadata.image_url)
-        case StickerMetadatum():
-            e = discord.Embed(
-                title=item_metadata.formatted_name,
-                color=get_rarity_embed_color(item_metadata.rarity),
-            )
-            e.add_field(name="Price", value=currency_str_format(item_metadata.price))
-            e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_regular_item())
-            e.set_image(url=item_metadata.image_url)
+    if isinstance(item_metadata, SkinMetadatum):
+        e = discord.Embed(
+            title=item_metadata.formatted_name,
+            description=item_metadata.description,
+            color=get_rarity_embed_color(item_metadata.rarity),
+        )
+        e.add_field(name="Price", value=currency_str_format(item_metadata.price))
+        e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_skin())
+        e.add_field(
+            name="Float Range",
+            value=f"{item_metadata.min_float:.2f} - {item_metadata.max_float:.2f}",
+        )
+        e.set_image(url=item_metadata.image_url)
+    elif isinstance(item_metadata, StickerMetadatum):
+        e = discord.Embed(
+            title=item_metadata.formatted_name,
+            color=get_rarity_embed_color(item_metadata.rarity),
+        )
+        e.add_field(name="Price", value=currency_str_format(item_metadata.price))
+        e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_regular_item())
+        e.set_image(url=item_metadata.image_url)
 
     await interaction.response.send_message(embed=e)
 

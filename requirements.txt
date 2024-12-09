@@ -6,7 +6,7 @@ mypy==1.13.0
 mypy-extensions==1.0.0
 python-dotenv==1.0.1
 requests==2.32.3
-spacecases-common==0.8.1
+spacecases-common==0.9.0
 types-requests==2.32.0.20241016
 typing_extensions==4.12.2
 
