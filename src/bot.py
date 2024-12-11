@@ -6,7 +6,16 @@ from discord import app_commands
 from src.logger import logger
 from src.database import Database
 from marisa_trie import Trie
-from spacecases_common import ItemMetadatum, StickerMetadatum, SkinMetadatum, Rarity
+from spacecases_common import (
+    ItemMetadatum,
+    StickerMetadatum,
+    SkinMetadatum,
+    Rarity,
+    Container,
+    SkinCase,
+    SouvenirPackage,
+    StickerCapsule,
+)
 from collections.abc import Iterable
 from typing import Any, Optional
 
@@ -65,6 +74,7 @@ class SpaceCasesBot(commands.Bot):
         )
         self.db = pool
         self.item_metadata: dict[str, ItemMetadatum] = {}
+        self.containers: dict[str, Container] = {}
         self.all_unformatted_names: list[str] = []
         self.skin_name_trie = Trie()
         self.command_ids: dict[str, int] = {}
@@ -114,9 +124,56 @@ class SpaceCasesBot(commands.Bot):
         self.skin_name_trie = new_skin_name_trie
         logger.info("Sticker metadata refreshed")
 
+    def refresh_containers(self):
+        new_containers = {}
+        logger.info("Refreshing skin cases")
+        raw_json = requests.get(
+            "https://assets.spacecases.xyz/generated/skin_cases.json"
+        ).json()
+        for unformatted_name, datum in raw_json.items():
+            new_containers[unformatted_name] = SkinCase(
+                datum["formatted_name"],
+                datum["price"],
+                datum["image_url"],
+                datum["requires_key"],
+                datum["contains"],
+                datum["contains_rare"],
+            )
+        logger.info("Skin cases refreshed")
+        logger.info("Refreshing souvenir packages")
+        raw_json = requests.get(
+            "https://assets.spacecases.xyz/generated/souvenir_packages.json"
+        ).json()
+        for unformatted_name, datum in raw_json.items():
+            new_containers[unformatted_name] = SouvenirPackage(
+                datum["formatted_name"],
+                datum["price"],
+                datum["image_url"],
+                datum["requires_key"],
+                datum["contains"],
+                datum["contains_rare"],
+            )
+        logger.info("Souvenir packages refreshed")
+        logger.info("Refreshing sticker capsules")
+        raw_json = requests.get(
+            "https://assets.spacecases.xyz/generated/sticker_capsules.json"
+        ).json()
+        for unformatted_name, datum in raw_json.items():
+            new_containers[unformatted_name] = StickerCapsule(
+                datum["formatted_name"],
+                datum["price"],
+                datum["image_url"],
+                datum["requires_key"],
+                datum["contains"],
+                datum["contains_rare"],
+            )
+        logger.info("Sticker capsules refreshed")
+        self.containers = new_containers
+
     @tasks.loop(minutes=15)
-    async def refresh_item_metadata_loop(self):
+    async def refresh_data_loop(self):
         self.refresh_item_metadata()
+        self.refresh_containers()
 
     @tasks.loop(seconds=10)
     async def bot_status_loop(self):
@@ -153,7 +210,7 @@ class SpaceCasesBot(commands.Bot):
             )
         for command in synced:
             self.command_ids[command.name] = command.id
-        self.refresh_item_metadata_loop.start()
+        self.refresh_data_loop.start()
 
     async def on_ready(self):
         self.bot_status_loop.start()

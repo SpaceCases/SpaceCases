@@ -36,7 +36,9 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str):
             color=get_rarity_embed_color(item_metadata.rarity),
         )
         e.add_field(name="Price", value=currency_str_format(item_metadata.price))
-        e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_regular_item())
+        e.add_field(
+            name="Rarity", value=item_metadata.rarity.get_name_for_regular_item()
+        )
         e.set_image(url=item_metadata.image_url)
 
     await interaction.response.send_message(embed=e)
