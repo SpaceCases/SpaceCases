@@ -189,7 +189,10 @@ class SpaceCasesBot(commands.Bot):
                 )
 
     async def close(self):
-        logger.info(f"Goodbye from {self.user}")
+        if self.user:
+            logger.info(f"Goodbye from {self.user}")
+        else:
+            logger.info("Goodbye!")
 
     async def setup_hook(self):
         self.user_count = (await self.db.fetch_from_file("count_users.sql"))[0]["count"]
