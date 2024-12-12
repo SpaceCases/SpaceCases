@@ -47,9 +47,9 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str):
 async def item_name_autocomplete(bot: SpaceCasesBot, current: str):
     unformatted_current = remove_skin_name_formatting(current)
     if len(unformatted_current) == 0:
-        options = random.sample(bot.all_unformatted_names, 25)
+        options = random.sample(bot.item_unformatted_names, 25)
     else:
-        options = list(islice(bot.skin_name_trie.keys(unformatted_current), 25))
+        options = list(islice(bot.item_trie.keys(unformatted_current), 25))
 
     return [
         discord.app_commands.Choice(

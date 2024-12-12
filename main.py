@@ -1,14 +1,14 @@
 import os
 import glob
 import asyncio
+from contextlib import suppress
 from src.database import Database
 from src.bot import SpaceCasesBot
 from src.logger import logger
-from src.environment import Environment
+from src.environment import environment
 
 
 async def main():
-    environment = Environment.load()
     async with await Database.create(
         environment.db_user,
         environment.db_password,
@@ -29,7 +29,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    try:
+    with suppress(KeyboardInterrupt):
         asyncio.run(main())
-    except KeyboardInterrupt:
-        pass

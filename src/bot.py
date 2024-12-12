@@ -5,6 +5,13 @@ from discord.ext import commands, tasks
 from discord import app_commands
 from src.logger import logger
 from src.database import Database
+from src.assets import (
+    get_skin_metadata,
+    get_sticker_metadata,
+    get_skin_cases,
+    get_souvenir_packages,
+    get_sticker_capsules,
+)
 from marisa_trie import Trie
 from spacecases_common import (
     ItemMetadatum,
@@ -73,102 +80,40 @@ class SpaceCasesBot(commands.Bot):
             command_prefix="", intents=intents, tree_cls=SpaceCasesCommandTree
         )
         self.db = pool
+        # items
         self.item_metadata: dict[str, ItemMetadatum] = {}
+        self.item_unformatted_names: list[str] = []
+        self.item_trie = Trie()
+        # containers
         self.containers: dict[str, Container] = {}
-        self.all_unformatted_names: list[str] = []
-        self.skin_name_trie = Trie()
+        self.container_unformatted_names: list[str] = []
+        self.container_trie = Trie()
+        # other stuff
         self.command_ids: dict[str, int] = {}
         self.status_int = 0
         self.user_count = 0
         self.test_guild = test_guild
 
     def refresh_item_metadata(self):
-        # get new skin metadata
-        logger.info("Refreshing skin metadata...")
-        new_item_metadata = {}
-        new_all_unformatted_names = []
-        raw_json = requests.get(
-            "https://assets.spacecases.xyz/generated/skin_metadata.json"
-        ).json()
-        for unformatted_name, datum in raw_json.items():
-            new_all_unformatted_names.append(unformatted_name)
-            skin_metadatum = SkinMetadatum(
-                datum["formatted_name"],
-                Rarity(datum["rarity"]),
-                datum["price"],
-                datum["image_url"],
-                datum["description"],
-                datum["min_float"],
-                datum["max_float"],
-            )
-            new_item_metadata[unformatted_name] = skin_metadatum
-        logger.info("Skin metadata refreshed")
-        # get new sticker metadata
-        logger.info("Refreshing sticker metadata...")
-        raw_json = requests.get(
-            "https://assets.spacecases.xyz/generated/sticker_metadata.json"
-        ).json()
-        for unformatted_name, datum in raw_json.items():
-            new_all_unformatted_names.append(unformatted_name)
-            sticker_metadatum = StickerMetadatum(
-                datum["formatted_name"],
-                Rarity(datum["rarity"]),
-                datum["price"],
-                datum["image_url"],
-            )
-            new_item_metadata[unformatted_name] = sticker_metadatum
-        # update data
-        new_skin_name_trie = Trie(new_all_unformatted_names)
-        self.item_metadata = new_item_metadata
-        self.all_unformatted_names = new_all_unformatted_names
-        self.skin_name_trie = new_skin_name_trie
-        logger.info("Sticker metadata refreshed")
+        skin_metadata = get_skin_metadata()
+        sticker_metadata = get_sticker_metadata()
+        self.item_metadata = skin_metadata | sticker_metadata
+        self.item_unformatted_names = list(skin_metadata.keys()) + list(
+            sticker_metadata.keys()
+        )
+        self.item_trie = Trie(self.item_unformatted_names)
 
     def refresh_containers(self):
-        new_containers = {}
-        logger.info("Refreshing skin cases")
-        raw_json = requests.get(
-            "https://assets.spacecases.xyz/generated/skin_cases.json"
-        ).json()
-        for unformatted_name, datum in raw_json.items():
-            new_containers[unformatted_name] = SkinCase(
-                datum["formatted_name"],
-                datum["price"],
-                datum["image_url"],
-                datum["requires_key"],
-                datum["contains"],
-                datum["contains_rare"],
-            )
-        logger.info("Skin cases refreshed")
-        logger.info("Refreshing souvenir packages")
-        raw_json = requests.get(
-            "https://assets.spacecases.xyz/generated/souvenir_packages.json"
-        ).json()
-        for unformatted_name, datum in raw_json.items():
-            new_containers[unformatted_name] = SouvenirPackage(
-                datum["formatted_name"],
-                datum["price"],
-                datum["image_url"],
-                datum["requires_key"],
-                datum["contains"],
-                datum["contains_rare"],
-            )
-        logger.info("Souvenir packages refreshed")
-        logger.info("Refreshing sticker capsules")
-        raw_json = requests.get(
-            "https://assets.spacecases.xyz/generated/sticker_capsules.json"
-        ).json()
-        for unformatted_name, datum in raw_json.items():
-            new_containers[unformatted_name] = StickerCapsule(
-                datum["formatted_name"],
-                datum["price"],
-                datum["image_url"],
-                datum["requires_key"],
-                datum["contains"],
-                datum["contains_rare"],
-            )
-        logger.info("Sticker capsules refreshed")
-        self.containers = new_containers
+        skin_cases = get_skin_cases()
+        souvenir_packages = get_souvenir_packages()
+        sticker_capsules = get_sticker_capsules()
+        self.containers = skin_cases | souvenir_packages | sticker_capsules
+        self.container_unformatted_names = (
+            list(skin_cases.keys())
+            + list(souvenir_packages.keys())
+            + list(sticker_capsules.keys())
+        )
+        self.container_trie = Trie(self.container_unformatted_names)
 
     @tasks.loop(minutes=15)
     async def refresh_data_loop(self):
