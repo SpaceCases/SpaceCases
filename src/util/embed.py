@@ -70,6 +70,7 @@ async def yes_no_embed(
         nonlocal responded
         if interaction.user != interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
+            return
         await on_yes(interaction)
         responded = True
 
@@ -78,6 +79,7 @@ async def yes_no_embed(
         nonlocal responded
         if interaction.user != interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
+            return
         await on_no(interaction)
         responded = True
 
