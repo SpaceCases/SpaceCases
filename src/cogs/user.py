@@ -5,6 +5,7 @@ from src.commands.user.close import close
 from src.commands.user.register import register
 from src.commands.user.balance import balance
 from src.commands.user.transfer import transfer
+from src.commands.user.claim import claim
 from typing import Optional
 
 
@@ -45,6 +46,10 @@ class User(commands.Cog):
         self, interaction: discord.Interaction, amount: str, recipient: discord.User
     ):
         await transfer(self.bot, interaction, amount, recipient)
+
+    @discord.app_commands.command(name="claim", description="Claim your daily balance")
+    async def claim(self, interaction: discord.Interaction):
+        await claim(self.bot, interaction)
 
 
 async def setup(bot: SpaceCasesBot):

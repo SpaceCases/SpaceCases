@@ -1,5 +1,4 @@
 import os
-import requests
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
@@ -15,13 +14,7 @@ from src.assets import (
 from marisa_trie import Trie
 from spacecases_common import (
     ItemMetadatum,
-    StickerMetadatum,
-    SkinMetadatum,
-    Rarity,
     Container,
-    SkinCase,
-    SouvenirPackage,
-    StickerCapsule,
 )
 from collections.abc import Iterable
 from typing import Any, Optional

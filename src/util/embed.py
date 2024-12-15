@@ -1,6 +1,6 @@
 import discord
 from typing import Any, Coroutine, Optional, Callable
-from discord.ui import Button, View
+from discord.ui import View
 from spacecases_common import Rarity
 
 
