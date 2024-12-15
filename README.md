@@ -24,12 +24,13 @@ Once you've set up the bot user, you can proceed with running the bot as outline
 ## Running
 
 ```bash
-git clone https://github.com/SpaceCases/SpaceCases # Clone repository to local machine
-cd SpaceCases                                      # Move into directory
-python -m venv env                                 # Create the virtual environment
-source env/bin/activate                            # Activate virtual environment
-python -m pip install -r requirements.txt          # Install dependencies
-mv .env.example .env                               # Rename .env.example to .env
+git clone https://github.com/SpaceCases/SpaceCases       # Clone repository to local machine
+cd SpaceCases                                            # Move into directory
+python -m venv env                                       # Create the virtual environment
+source env/bin/activate                                  # Activate virtual environment
+python -m pip install -r requirements.txt                # Install dependencies
+mv .env.example .env                                     # Rename .env.example to .env
+psql -U user -h host database_name -f src/sql/init.sql   # Run init.sql file to setup database
 ```
 Then use your preferred text editor of choice to edit the environment variables in `.env`. Once that is setup, you can run the bot:
 ```bash
