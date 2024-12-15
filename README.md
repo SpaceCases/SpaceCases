@@ -6,7 +6,7 @@ SpaceCases is a Discord bot for trading, unboxing, and collecting virtual CS2 sk
 
 Before running the bot, ensure that you have the following:
 
-- **Python 3.8+** installed on your machine.
+- **Python 3.12+** installed on your machine.
 - **PostgreSQL** with a database and an associated superuser.
 - A **Discord bot user** setup with the necessary permissions:
   - **Create a Bot User**: Follow [this guide](https://discordpy.readthedocs.io/en/stable/discord.html) to create a Discord bot and obtain its token.
