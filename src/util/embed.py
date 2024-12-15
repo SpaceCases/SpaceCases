@@ -1,5 +1,5 @@
 import discord
-from typing import Optional
+from typing import Any, Coroutine, Optional, Callable
 from discord.ui import Button, View
 from spacecases_common import Rarity
 
@@ -51,59 +51,59 @@ async def send_err_embed(
     )
 
 
+type ButtonCallbackType = Callable[[discord.Interaction], Coroutine[Any, Any, None]]
+
+
+class YesNoEmbedView(View):
+    def __init__(
+        self,
+        on_yes: ButtonCallbackType,
+        on_no: ButtonCallbackType,
+        interaction: discord.Interaction,
+        timeout: Optional[float] = 30,
+    ):
+        self.on_yes = on_yes
+        self.on_no = on_no
+        self.responded = False
+        self.interaction = interaction
+        super().__init__(timeout=timeout)
+
+    @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
+    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user != interaction.user:
+            await send_err_embed(interaction, "This is not your button!", True)
+            return
+        await self.on_yes(interaction)
+        self.responded = True
+
+    @discord.ui.button(label="No", style=discord.ButtonStyle.red)
+    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user != interaction.user:
+            await send_err_embed(interaction, "This is not your button!", True)
+            return
+        await self.on_no(interaction)
+        self.responded = True
+
+    async def on_timeout(self):
+        if self.responded:
+            return
+        message = await self.interaction.original_response()
+        new_embed = create_err_embed("You did **not** respond in time")
+        await message.edit(embed=new_embed, view=None)
+        return await super().on_timeout()
+
+
 async def yes_no_embed(
     interaction: discord.Interaction,
     msg_content: str,
-    on_yes,
-    on_no,
+    on_yes: ButtonCallbackType,
+    on_no: ButtonCallbackType,
     timeout: Optional[float] = 30,
 ) -> None:
-    responded = False
     embed = discord.Embed(description=msg_content, color=discord.Color.dark_theme())
-
-    # Define buttons
-    yes_button: Button = Button(label="Yes", style=discord.ButtonStyle.green)
-    no_button: Button = Button(label="No", style=discord.ButtonStyle.red)
-
-    # Callback for "Yes" button
-    async def yes_button_callback(interaction: discord.Interaction):
-        nonlocal responded
-        if interaction.user != interaction.user:
-            await send_err_embed(interaction, "This is not your button!", True)
-            return
-        await on_yes(interaction)
-        responded = True
-
-    # Callback for "No" button
-    async def no_button_callback(interaction: discord.Interaction):
-        nonlocal responded
-        if interaction.user != interaction.user:
-            await send_err_embed(interaction, "This is not your button!", True)
-            return
-        await on_no(interaction)
-        responded = True
-
-    # Attach callbacks to buttons
-    yes_button.callback = yes_button_callback  # type: ignore[assignment]
-    no_button.callback = no_button_callback  # type: ignore[assignment]
-
-    async def timeout_callback():
-        if responded:
-            return
-        # Edit the message to indicate timeout and remove buttons
-        message = await interaction.original_response()
-        # Edit the message to indicate timeout and remove buttons
-        new_embed = create_err_embed("You did **not** respond in time")
-        await message.edit(embed=new_embed, view=None)
-
-    # Create a view and add buttons
-    view = View(timeout=timeout)
-    view.on_timeout = timeout_callback  # type: ignore[assignment]
-    view.add_item(yes_button)
-    view.add_item(no_button)
-
-    # Send the message with the embed and buttons
-    await interaction.response.send_message(embed=embed, view=view)
+    await interaction.response.send_message(
+        embed=embed, view=YesNoEmbedView(on_yes, on_no, interaction, timeout)
+    )
 
 
 def get_rarity_embed_color(rarity: Rarity):
