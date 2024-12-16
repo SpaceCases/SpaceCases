@@ -1,10 +1,7 @@
-import os
-import glob
 import asyncio
 from contextlib import suppress
 from src.database import Database
 from src.bot import SpaceCasesBot
-from src.logger import logger
 from src.environment import environment
 
 
