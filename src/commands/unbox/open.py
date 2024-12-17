@@ -6,6 +6,7 @@ from src.bot import SpaceCasesBot
 from src.util.embed import get_rarity_embed_color, send_err_embed
 from src.util.string import currency_str_format
 from src.util.constants import KEY_PRICE
+from src.database import Database
 from spacecases_common import (
     remove_skin_name_formatting,
     SkinContainerEntry,
@@ -14,7 +15,97 @@ from spacecases_common import (
     SkinCase,
     SouvenirPackage,
     SkinMetadatum,
+    ItemMetadatum,
+    Container,
 )
+
+
+class OpenView(discord.ui.View):
+    def __init__(
+        self,
+        interaction: discord.Interaction,
+        db: Database,
+        container: Container,
+        item: ItemMetadatum,
+        item_unformatted_name: str,
+        float: Optional[float],
+    ):
+        self.interaction = interaction
+        self.item = item
+        self.db = db
+        self.container = container
+        self.item_unformatted_name = item_unformatted_name
+        self.float = float
+        self.responded = False
+        super().__init__(timeout=30)
+
+    @discord.ui.button(label="Add To Inventory", style=discord.ButtonStyle.green)
+    async def add_to_inventory(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        if interaction.user != self.interaction.user:
+            await send_err_embed(interaction, "This is not your button!", True)
+            return
+        result = await self.db.fetch_from_file(
+            "add_item_to_inventory.sql",
+            self.interaction.user.id,
+            self.item_unformatted_name,
+            self.float,
+        )
+        if len(result) == 0:
+            await send_err_embed(
+                interaction,
+                "You don't have enough inventory space for this action!",
+                ephemeral=True,
+            )
+        else:
+            message = await self.interaction.original_response()
+            e = discord.Embed(
+                title=self.item.formatted_name, color=discord.Color.green()
+            )
+            e.add_field(name="Price", value=currency_str_format(self.item.price))
+            if isinstance(self.item, SkinMetadatum):
+                e.description = self.item.description
+                e.add_field(name="Float", value=str(self.float))
+            e.set_image(url=self.item.image_url)
+            e.set_footer(
+                text=f"Unboxed by {self.interaction.user.display_name}",
+                icon_url=self.interaction.user.display_avatar.url,
+            )
+            await message.edit(embed=e, view=None)
+
+    async def sell(self):
+        await self.db.execute_from_file(
+            "change_balance.sql", self.interaction.user.id, self.item.price
+        )
+        message = await self.interaction.original_response()
+        e = discord.Embed(
+            title=f"{self.item.formatted_name} - Sold!", color=discord.Color.dark_grey()
+        )
+        e.add_field(name="Price", value=currency_str_format(self.item.price))
+        if isinstance(self.item, SkinMetadatum):
+            e.description = self.item.description
+            e.add_field(name="Float", value=str(self.float))
+        e.set_image(url=self.item.image_url)
+        e.set_footer(
+            text=f"Sold by {self.interaction.user.display_name}",
+            icon_url=self.interaction.user.display_avatar.url,
+        )
+        await message.edit(embed=e, view=None)
+
+    @discord.ui.button(label="Sell", style=discord.ButtonStyle.red)
+    async def sell_callback(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        if interaction.user != self.interaction.user:
+            await send_err_embed(interaction, "This is not your button!", True)
+            return
+        await self.sell()
+
+    async def on_timeout(self):
+        if self.responded:
+            return
+        await self.sell()
 
 
 async def open(
@@ -62,6 +153,7 @@ async def open(
             if random_int <= cum:
                 break
         container_entry = random.choice(container.contains[rarity])
+
     # generate the item
     if isinstance(container_entry, SkinContainerEntry):
         # calculate its float value
@@ -69,8 +161,6 @@ async def open(
         max_float = container_entry.max_float
 
         float_value = random.random()
-
-        # determine condition
         if float_value > 0 and float_value <= 0.1471:
             float_value = random.uniform(0.00, 0.07)
         elif float_value > 0.1471 and float_value <= 0.3939:
@@ -106,15 +196,18 @@ async def open(
             unformatted_name = container_entry.unformatted_name + condition
 
     elif isinstance(container_entry, ItemContainerEntry):
+        final_float = None
         unformatted_name = container_entry.unformatted_name
 
     # if the container is a skin case, 10% chance of stattrak
     if isinstance(container, SkinCase):
         if random.randint(1, 10) == 1:
             unformatted_name = "stattrak" + unformatted_name
+
     # if the container is a souvenir package, always come as souvenir item
     elif isinstance(container, SouvenirPackage):
         unformatted_name = "souvenir" + unformatted_name
+
     # create embed
     item_metadatum = bot.item_metadata[unformatted_name]
     e = discord.Embed(
@@ -125,13 +218,22 @@ async def open(
     if isinstance(item_metadatum, SkinMetadatum):
         e.description = item_metadatum.description
         e.add_field(name="Float", value=str(final_float))
-    e.set_thumbnail(url=container.image_url)
     e.set_image(url=item_metadatum.image_url)
     e.set_footer(
         text="Item will automatically sell in 30 seconds!",
         icon_url=interaction.user.display_avatar.url,
     )
-    await interaction.response.send_message(embed=e)
+    await interaction.response.send_message(
+        embed=e,
+        view=OpenView(
+            interaction,
+            bot.db,
+            container,
+            item_metadatum,
+            unformatted_name,
+            final_float,
+        ),
+    )
 
 
 async def open_name_autocomplete(bot: SpaceCasesBot, current: str):

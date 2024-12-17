@@ -53,7 +53,7 @@ async def transfer(
 
             # give their balance
             rows = await bot.db.fetch_from_file(
-                "change_balance.sql", cents, recipient.id
+                "change_balance.sql", recipient.id, cents
             )
             if len(rows) == 0:
                 await send_err_embed(
@@ -63,7 +63,9 @@ async def transfer(
             new_recipient_balance = rows[0]["balance"]
             # remove our balance
             rows = await bot.db.fetch_from_file(
-                "change_balance.sql", -cents, interaction.user.id
+                "change_balance.sql",
+                interaction.user.id,
+                -cents,
             )
             new_sender_balance = rows[0]["balance"]
     e = discord.Embed(

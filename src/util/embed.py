@@ -70,7 +70,7 @@ class YesNoEmbedView(View):
 
     @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user != interaction.user:
+        if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
         await self.on_yes(interaction)
@@ -78,7 +78,7 @@ class YesNoEmbedView(View):
 
     @discord.ui.button(label="No", style=discord.ButtonStyle.red)
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if interaction.user != interaction.user:
+        if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
         await self.on_no(interaction)
@@ -90,7 +90,6 @@ class YesNoEmbedView(View):
         message = await self.interaction.original_response()
         new_embed = create_err_embed("You did **not** respond in time")
         await message.edit(embed=new_embed, view=None)
-        return await super().on_timeout()
 
 
 async def yes_no_embed(

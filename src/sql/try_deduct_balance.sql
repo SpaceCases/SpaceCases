@@ -1,3 +1,9 @@
+/*
+Try and deduct balance from a user
+Returns NULL if user doesn't exist
+Returns TRUE if successfully deducted
+Returns FALSE if user doesn't have enough
+*/
 WITH user_exists AS (
     -- Check if the user exists
     SELECT EXISTS (SELECT 1 FROM "users" WHERE id = $1) AS exists
