@@ -42,7 +42,7 @@ class OpenView(discord.ui.View):
     @discord.ui.button(label="Add To Inventory", style=discord.ButtonStyle.green)
     async def add_to_inventory(
         self, interaction: discord.Interaction, button: discord.ui.Button
-    ):
+    ) -> None:
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
@@ -74,7 +74,7 @@ class OpenView(discord.ui.View):
             )
             await message.edit(embed=e, view=None)
 
-    async def sell(self):
+    async def sell(self) -> None:
         await self.db.execute_from_file(
             "change_balance.sql", self.interaction.user.id, self.item.price
         )
@@ -96,13 +96,13 @@ class OpenView(discord.ui.View):
     @discord.ui.button(label="Sell", style=discord.ButtonStyle.red)
     async def sell_callback(
         self, interaction: discord.Interaction, button: discord.ui.Button
-    ):
+    ) -> None:
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
         await self.sell()
 
-    async def on_timeout(self):
+    async def on_timeout(self) -> None:
         if self.responded:
             return
         await self.sell()
@@ -112,7 +112,7 @@ async def open(
     bot: SpaceCasesBot,
     interaction: discord.Interaction,
     container_formatted_name: str,
-):
+) -> None:
     container_unformatted_name = remove_skin_name_formatting(container_formatted_name)
     container = bot.containers[container_unformatted_name]
     price = container.price
@@ -236,7 +236,9 @@ async def open(
     )
 
 
-async def open_name_autocomplete(bot: SpaceCasesBot, current: str):
+async def open_name_autocomplete(
+    bot: SpaceCasesBot, current: str
+) -> list[discord.app_commands.Choice]:
     unformatted_current = remove_skin_name_formatting(current)
     if len(unformatted_current) == 0:
         options = random.sample(bot.container_unformatted_names, 25)

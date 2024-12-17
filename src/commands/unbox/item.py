@@ -11,7 +11,7 @@ from spacecases_common import (
 )
 
 
-async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str):
+async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str) -> None:
     unformatted_name = remove_skin_name_formatting(name)
     if unformatted_name not in bot.item_metadata:
         await send_err_embed(interaction, f"No item exists with name: `{name}`")
@@ -44,7 +44,9 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str):
     await interaction.response.send_message(embed=e)
 
 
-async def item_name_autocomplete(bot: SpaceCasesBot, current: str):
+async def item_name_autocomplete(
+    bot: SpaceCasesBot, current: str
+) -> list[discord.app_commands.Choice]:
     unformatted_current = remove_skin_name_formatting(current)
     if len(unformatted_current) == 0:
         options = random.sample(bot.item_unformatted_names, 25)

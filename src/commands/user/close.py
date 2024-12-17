@@ -10,7 +10,7 @@ from src.util.embed import (
 RESPONSE_TIME = 30
 
 
-async def close(bot: SpaceCasesBot, interaction: discord.Interaction):
+async def close(bot: SpaceCasesBot, interaction: discord.Interaction) -> None:
     # check if user has an accout to delete
     does_user_exist = (
         await bot.db.fetch_from_file("does_user_exist.sql", interaction.user.id)
@@ -19,11 +19,11 @@ async def close(bot: SpaceCasesBot, interaction: discord.Interaction):
         await send_err_embed(interaction, "You **don't** have an account delete")
         return
 
-    async def on_no(interaction: discord.Interaction):
+    async def on_no(interaction: discord.Interaction) -> None:
         new_embed = create_err_embed("Account deletion **cancelled**")
         await interaction.response.edit_message(embed=new_embed, view=None)
 
-    async def on_yes(interaction: discord.Interaction):
+    async def on_yes(interaction: discord.Interaction) -> None:
         rows = await bot.db.fetch_from_file("close.sql", interaction.user.id)
         if len(rows) > 0:
             new_embed = create_success_embed(

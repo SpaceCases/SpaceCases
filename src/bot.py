@@ -55,7 +55,7 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
 
     async def on_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ):
+    ) -> None:
         logger.error(f"{error}")
         e = discord.Embed(
             title="An error occurred!",
@@ -87,7 +87,7 @@ class SpaceCasesBot(commands.Bot):
         self.user_count = 0
         self.test_guild = test_guild
 
-    def refresh_item_metadata(self):
+    def refresh_item_metadata(self) -> None:
         skin_metadata = get_skin_metadata()
         sticker_metadata = get_sticker_metadata()
         self.item_metadata = skin_metadata | sticker_metadata
@@ -96,7 +96,7 @@ class SpaceCasesBot(commands.Bot):
         )
         self.item_trie = Trie(self.item_unformatted_names)
 
-    def refresh_containers(self):
+    def refresh_containers(self) -> None:
         skin_cases = get_skin_cases()
         souvenir_packages = get_souvenir_packages()
         sticker_capsules = get_sticker_capsules()
@@ -109,12 +109,12 @@ class SpaceCasesBot(commands.Bot):
         self.container_trie = Trie(self.container_unformatted_names)
 
     @tasks.loop(minutes=15)
-    async def refresh_data_loop(self):
+    async def refresh_data_loop(self) -> None:
         self.refresh_item_metadata()
         self.refresh_containers()
 
     @tasks.loop(seconds=10)
-    async def bot_status_loop(self):
+    async def bot_status_loop(self) -> None:
         self.status_int = (self.status_int + 1) % 2
         match self.status_int:
             case 0:
@@ -126,13 +126,13 @@ class SpaceCasesBot(commands.Bot):
                     )
                 )
 
-    async def close(self):
+    async def close(self) -> None:
         if self.user:
             logger.info(f"Goodbye from {self.user}")
         else:
             logger.info("Goodbye!")
 
-    async def setup_hook(self):
+    async def setup_hook(self) -> None:
         self.user_count = (await self.db.fetch_from_file("count_users.sql"))[0]["count"]
         await self._load_cogs()
         if self.test_guild is not None:
@@ -153,7 +153,7 @@ class SpaceCasesBot(commands.Bot):
             self.command_ids[command.name] = command.id
         self.refresh_data_loop.start()
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         self.bot_status_loop.start()
         logger.info(f"Bot is logged in as {self.user}")
         logger.info("Bot is ready to receive commands - press CTRL+C to stop")
@@ -180,7 +180,7 @@ Enjoy! - [Spacerulerwill](https://github.com/Spacerulerwill)""",
             e.set_thumbnail(url=self.user.display_avatar.url)
         return e
 
-    async def on_guild_join(self, guild: discord.Guild):
+    async def on_guild_join(self, guild: discord.Guild) -> None:
         logger.info(f"Joined new guild {guild.name} ({guild.id})")
         if (
             guild.system_channel
@@ -191,14 +191,14 @@ Enjoy! - [Spacerulerwill](https://github.com/Spacerulerwill)""",
             if guild.owner:
                 await guild.owner.send(embed=self.get_welcome_embed())
 
-    async def _load_cogs(self):
+    async def _load_cogs(self) -> None:
         for filename in os.listdir("src/cogs"):
             if filename.endswith(".py"):
                 cog_name = filename.removesuffix(".py")
                 await self.load_extension(f"src.cogs.{cog_name}")
                 logger.info(f"Loaded cog: {cog_name}")
 
-    async def on_message(self, _: discord.Message):
+    async def on_message(self, _: discord.Message) -> None:
         # Disabling chat commands
         pass
 

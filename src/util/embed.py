@@ -69,7 +69,9 @@ class YesNoEmbedView(View):
         super().__init__(timeout=timeout)
 
     @discord.ui.button(label="Yes", style=discord.ButtonStyle.green)
-    async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def yes(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
@@ -77,14 +79,16 @@ class YesNoEmbedView(View):
         self.responded = True
 
     @discord.ui.button(label="No", style=discord.ButtonStyle.red)
-    async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def no(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
         await self.on_no(interaction)
         self.responded = True
 
-    async def on_timeout(self):
+    async def on_timeout(self) -> None:
         if self.responded:
             return
         message = await self.interaction.original_response()
@@ -105,7 +109,7 @@ async def yes_no_embed(
     )
 
 
-def get_rarity_embed_color(rarity: Rarity):
+def get_rarity_embed_color(rarity: Rarity) -> int:
     return [0xB0C3D9, 0x5E98D9, 0x4B69FF, 0x8847FF, 0xD32CE6, 0xEB4B4B, 0xE4AE39][
         rarity.value
     ]

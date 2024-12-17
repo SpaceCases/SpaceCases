@@ -5,7 +5,7 @@ from src.util.embed import send_err_embed
 from src.util.string import currency_str_format
 
 
-async def claim(bot: SpaceCasesBot, interaction: discord.Interaction):
+async def claim(bot: SpaceCasesBot, interaction: discord.Interaction) -> None:
     rows = await bot.db.fetch_from_file("claim.sql", interaction.user.id)
     status: Optional[bool] = rows[0]["status"]
     if status is None:

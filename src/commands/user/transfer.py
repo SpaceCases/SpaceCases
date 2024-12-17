@@ -11,7 +11,7 @@ async def transfer(
     interaction: discord.Interaction,
     amount: str,
     recipient: discord.User,
-):
+) -> None:
     if interaction.user.id == recipient.id:
         await send_err_embed(interaction, "You **cannot** transfer money to yourself")
         return

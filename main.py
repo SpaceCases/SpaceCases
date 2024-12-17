@@ -5,7 +5,7 @@ from src.bot import SpaceCasesBot
 from src.environment import environment
 
 
-async def main():
+async def main() -> None:
     async with await Database.create(
         environment.db_user,
         environment.db_password,
