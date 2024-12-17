@@ -54,7 +54,7 @@ async def item_name_autocomplete(bot: SpaceCasesBot, current: str):
     return [
         discord.app_commands.Choice(
             name=bot.item_metadata[unformatted_name].formatted_name,
-            value=unformatted_name,
+            value=bot.item_metadata[unformatted_name].formatted_name,
         )
         for unformatted_name in options
     ]

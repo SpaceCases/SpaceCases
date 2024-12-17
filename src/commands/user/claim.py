@@ -1,24 +1,21 @@
 import discord
+from typing import Optional
 from src.bot import SpaceCasesBot
 from src.util.embed import send_err_embed
 from src.util.string import currency_str_format
 
-USER_NOT_FOUND = 0
-USER_CANT_CLAIM = 1
-USER_CLAIM_SUCCESS = 2
-
 
 async def claim(bot: SpaceCasesBot, interaction: discord.Interaction):
     rows = await bot.db.fetch_from_file("claim.sql", interaction.user.id)
-    status = rows[0]["status"]
-    if status == USER_NOT_FOUND:
+    status: Optional[bool] = rows[0]["status"]
+    if status is None:
         await send_err_embed(
             interaction,
             f"You are **not** registered. Use {bot.get_slash_command_mention_string('register')} to register!",
         )
-    elif status == USER_CANT_CLAIM:
+    elif not status:
         await send_err_embed(interaction, "You have **already** claimed today!")
-    elif status == USER_CLAIM_SUCCESS:
+    else:
         e = discord.Embed(
             title="You have successfully claimed your daily reward!",
             color=discord.Color.green(),

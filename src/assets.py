@@ -3,6 +3,8 @@ import requests
 from spacecases_common import (
     SkinMetadatum,
     StickerMetadatum,
+    SkinContainerEntry,
+    ItemContainerEntry,
     Rarity,
     SkinCase,
     SouvenirPackage,
@@ -18,7 +20,7 @@ SKIN_METADATA_PATH = os.path.join(
     environment.asset_domain, "generated", "skin_metadata.json"
 )
 STICKER_METADATA_PATH = os.path.join(
-    environment.asset_domain, "generated", "skin_metadata.json"
+    environment.asset_domain, "generated", "sticker_metadata.json"
 )
 SKIN_CASES_METADATA_PATH = os.path.join(
     environment.asset_domain, "generated", "skin_cases.json"
@@ -76,8 +78,11 @@ def get_skin_cases() -> dict[str, SkinCase]:
             datum["price"],
             datum["image_url"],
             datum["requires_key"],
-            datum["contains"],
-            datum["contains_rare"],
+            {
+                Rarity(int(key)): [SkinContainerEntry(**item) for item in val]
+                for key, val in datum["contains"].items()
+            },
+            [SkinContainerEntry(**val) for val in datum["contains_rare"]],
         )
     logger.info("Skin cases refreshed")
     return skin_cases
@@ -93,8 +98,11 @@ def get_souvenir_packages() -> dict[str, SouvenirPackage]:
             datum["price"],
             datum["image_url"],
             datum["requires_key"],
-            datum["contains"],
-            datum["contains_rare"],
+            {
+                Rarity(int(key)): [SkinContainerEntry(**item) for item in val]
+                for key, val in datum["contains"].items()
+            },
+            [SkinContainerEntry(**val) for val in datum["contains_rare"]],
         )
     logger.info("Souvenir packages refreshed")
     return souvenir_packages
@@ -110,8 +118,11 @@ def get_sticker_capsules() -> dict[str, StickerCapsule]:
             datum["price"],
             datum["image_url"],
             datum["requires_key"],
-            datum["contains"],
-            datum["contains_rare"],
+            {
+                Rarity(int(key)): [ItemContainerEntry(**item) for item in val]
+                for key, val in datum["contains"].items()
+            },
+            [ItemContainerEntry(**val) for val in datum["contains_rare"]],
         )
     logger.info("Sticker capsules refreshed")
     return sticker_capsules

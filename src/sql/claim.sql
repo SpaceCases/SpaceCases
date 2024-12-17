@@ -27,9 +27,9 @@ updated_user AS (
 )
 SELECT 
     CASE 
-        WHEN NOT EXISTS (SELECT 1 FROM user_exists WHERE exists) THEN 0  -- User not found
-        WHEN NOT EXISTS (SELECT 1 FROM updated_user) THEN 1  -- User exists but cannot claim yet
-        ELSE 2  -- Success
+        WHEN NOT EXISTS (SELECT 1 FROM user_exists WHERE exists) THEN NULL  -- User not found
+        WHEN NOT EXISTS (SELECT 1 FROM updated_user) THEN FALSE  -- User exists but cannot claim yet
+        ELSE TRUE  -- Success
     END AS status,
     updated_user.balance,
     updated_user.streak,
