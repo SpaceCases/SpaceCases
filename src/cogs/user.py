@@ -14,22 +14,38 @@ class User(commands.Cog):
     def __init__(self, bot: SpaceCasesBot):
         self.bot = bot
 
-    @discord.app_commands.command(name="register", description="Register for a SpaceCases account")
+    @discord.app_commands.command(
+        name="register", description="Register for a SpaceCases account"
+    )
     async def register(self, interaction: discord.Interaction) -> None:
         await register(self.bot, interaction)
 
-    @discord.app_commands.command(name="close", description="Close your SpaceCases account")
+    @discord.app_commands.command(
+        name="close", description="Close your SpaceCases account"
+    )
     async def close(self, interaction: discord.Interaction) -> None:
         await close(self.bot, interaction)
 
-    @discord.app_commands.command(name="balance", description="Check your SpaceCases account balance")
-    @discord.app_commands.describe(user="The user whose balance you want to check. Defaults to your own balance if not specified.")
-    async def balance(self, interaction: discord.Interaction, user: Optional[discord.User]) -> None:
+    @discord.app_commands.command(
+        name="balance", description="Check your SpaceCases account balance"
+    )
+    @discord.app_commands.describe(
+        user="The user whose balance you want to check. Defaults to your own balance if not specified."
+    )
+    async def balance(
+        self, interaction: discord.Interaction, user: Optional[discord.User]
+    ) -> None:
         await balance(self.bot, interaction, user)
 
-    @discord.app_commands.command(name="transfer", description="Transfer balance to another SpaceCases account")
-    @discord.app_commands.describe(amount="Amount of balance to transfer", recipient="Recipient of the balance")
-    async def transfer(self, interaction: discord.Interaction, amount: str, recipient: discord.User) -> None:
+    @discord.app_commands.command(
+        name="transfer", description="Transfer balance to another SpaceCases account"
+    )
+    @discord.app_commands.describe(
+        amount="Amount of balance to transfer", recipient="Recipient of the balance"
+    )
+    async def transfer(
+        self, interaction: discord.Interaction, amount: str, recipient: discord.User
+    ) -> None:
         await transfer(self.bot, interaction, amount, recipient)
 
     @discord.app_commands.command(name="claim", description="Claim your daily balance")
@@ -53,7 +69,9 @@ class User(commands.Cog):
         await inventory(self.bot, interaction, user, item_name)
 
     @inventory.autocomplete("item_name")
-    async def item_name_autocomplete(self, interaction: discord.Interaction, current: str) -> list[discord.app_commands.Choice]:
+    async def item_name_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> list[discord.app_commands.Choice]:
         return await item_name_autocomplete(self.bot, interaction, current)
 
 

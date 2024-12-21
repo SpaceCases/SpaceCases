@@ -16,11 +16,21 @@ from src.logger import logger
 T_LOGO = os.path.join(environment.asset_domain, "static", "t.webp")
 CT_LOGO = os.path.join(environment.asset_domain, "static", "ct.webp")
 
-SKIN_METADATA_PATH = os.path.join(environment.asset_domain, "generated", "skin_metadata.json")
-STICKER_METADATA_PATH = os.path.join(environment.asset_domain, "generated", "sticker_metadata.json")
-SKIN_CASES_METADATA_PATH = os.path.join(environment.asset_domain, "generated", "skin_cases.json")
-STICKER_CAPSULE_METADATA_PATH = os.path.join(environment.asset_domain, "generated", "sticker_capsules.json")
-SOUVENIR_PACKAGE_METADATA_PATH = os.path.join(environment.asset_domain, "generated", "souvenir_packages.json")
+SKIN_METADATA_PATH = os.path.join(
+    environment.asset_domain, "generated", "skin_metadata.json"
+)
+STICKER_METADATA_PATH = os.path.join(
+    environment.asset_domain, "generated", "sticker_metadata.json"
+)
+SKIN_CASES_METADATA_PATH = os.path.join(
+    environment.asset_domain, "generated", "skin_cases.json"
+)
+STICKER_CAPSULE_METADATA_PATH = os.path.join(
+    environment.asset_domain, "generated", "sticker_capsules.json"
+)
+SOUVENIR_PACKAGE_METADATA_PATH = os.path.join(
+    environment.asset_domain, "generated", "souvenir_packages.json"
+)
 
 
 def get_skin_metadata() -> dict[str, SkinMetadatum]:
@@ -68,7 +78,10 @@ def get_skin_cases() -> dict[str, SkinCase]:
             datum["price"],
             datum["image_url"],
             datum["requires_key"],
-            {Rarity(int(key)): [SkinContainerEntry(**item) for item in val] for key, val in datum["contains"].items()},
+            {
+                Rarity(int(key)): [SkinContainerEntry(**item) for item in val]
+                for key, val in datum["contains"].items()
+            },
             [SkinContainerEntry(**val) for val in datum["contains_rare"]],
         )
     logger.info("Skin cases refreshed")
@@ -85,7 +98,10 @@ def get_souvenir_packages() -> dict[str, SouvenirPackage]:
             datum["price"],
             datum["image_url"],
             datum["requires_key"],
-            {Rarity(int(key)): [SkinContainerEntry(**item) for item in val] for key, val in datum["contains"].items()},
+            {
+                Rarity(int(key)): [SkinContainerEntry(**item) for item in val]
+                for key, val in datum["contains"].items()
+            },
             [SkinContainerEntry(**val) for val in datum["contains_rare"]],
         )
     logger.info("Souvenir packages refreshed")
@@ -102,7 +118,10 @@ def get_sticker_capsules() -> dict[str, StickerCapsule]:
             datum["price"],
             datum["image_url"],
             datum["requires_key"],
-            {Rarity(int(key)): [ItemContainerEntry(**item) for item in val] for key, val in datum["contains"].items()},
+            {
+                Rarity(int(key)): [ItemContainerEntry(**item) for item in val]
+                for key, val in datum["contains"].items()
+            },
             [ItemContainerEntry(**val) for val in datum["contains_rare"]],
         )
     logger.info("Sticker capsules refreshed")

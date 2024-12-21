@@ -11,7 +11,7 @@ dependencies = [
     "requests == 2.32.3",
     "spacecases-common == 0.9.5",
     "types-requests == 2.32.0.20241016",
-    "black == 24.10.0",
+    "ruff == 0.8.4",
     "mypy == 1.14.0"
 ]
 

@@ -15,7 +15,9 @@ class Unbox(commands.Cog):
         await item(self.bot, interaction, name)
 
     @item.autocomplete("name")
-    async def item_autocomplete(self, _: discord.Interaction, current: str) -> list[discord.app_commands.Choice]:
+    async def item_autocomplete(
+        self, _: discord.Interaction, current: str
+    ) -> list[discord.app_commands.Choice]:
         return await item_name_autocomplete(self.bot, current)
 
     @discord.app_commands.command(name="open", description="Open a container")
@@ -24,7 +26,9 @@ class Unbox(commands.Cog):
         await open(self.bot, interaction, name)
 
     @open.autocomplete("name")
-    async def open_autocomplete(self, _: discord.Interaction, current: str) -> list[discord.app_commands.Choice]:
+    async def open_autocomplete(
+        self, _: discord.Interaction, current: str
+    ) -> list[discord.app_commands.Choice]:
         return await open_name_autocomplete(self.bot, current)
 
 
