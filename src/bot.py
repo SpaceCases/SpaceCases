@@ -63,6 +63,7 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
             color=discord.Color.red(),
         )
         await interaction.response.send_message(embed=e, ephemeral=True)
+        raise error
 
 
 class SpaceCasesBot(commands.Bot):

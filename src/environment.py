@@ -19,7 +19,7 @@ class Environment:
 
     @staticmethod
     def load() -> "Environment":
-        load_dotenv()
+        load_dotenv(override=True)
         return Environment(
             bot_token=os.environ["BOT_TOKEN"],
             db_user=os.environ["DB_USER"],

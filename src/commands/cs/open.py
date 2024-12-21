@@ -15,6 +15,7 @@ from spacecases_common import (
     SkinCase,
     SouvenirPackage,
     SkinMetadatum,
+    StickerMetadatum,
     ItemMetadatum,
     Container,
 )
@@ -46,12 +47,21 @@ class OpenView(discord.ui.View):
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
-        result = await self.db.fetch_from_file(
-            "add_item_to_inventory.sql",
-            self.interaction.user.id,
-            self.item_unformatted_name,
-            self.float,
-        )
+        # add the item to our inventory
+        if isinstance(self.item, SkinMetadatum):
+            result = await self.db.fetch_from_file(
+                "inventory/add_skin.sql",
+                self.interaction.user.id,
+                self.item_unformatted_name,
+                self.float,
+            )
+        elif isinstance(self.item, StickerMetadatum):
+            result = await self.db.fetch_from_file(
+                "inventory/add_sticker.sql",
+                self.interaction.user.id,
+                self.item_unformatted_name,
+            )
+        # no space left/not registered
         if len(result) == 0:
             await send_err_embed(
                 interaction,
@@ -73,6 +83,7 @@ class OpenView(discord.ui.View):
                 icon_url=self.interaction.user.display_avatar.url,
             )
             await message.edit(embed=e, view=None)
+            self.responded = True
 
     async def sell(self) -> None:
         await self.db.execute_from_file(
@@ -101,6 +112,7 @@ class OpenView(discord.ui.View):
             await send_err_embed(interaction, "This is not your button!", True)
             return
         await self.sell()
+        self.responded = True
 
     async def on_timeout(self) -> None:
         if self.responded:

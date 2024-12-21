@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 from src.bot import SpaceCasesBot
-from src.commands.unbox.item import item, item_name_autocomplete
-from src.commands.unbox.open import open, open_name_autocomplete
+from src.commands.cs.item import item, item_name_autocomplete
+from src.commands.cs.open import open, open_name_autocomplete
 
 
 class Unbox(commands.Cog):
