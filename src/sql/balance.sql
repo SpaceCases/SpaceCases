@@ -1,2 +1,7 @@
 -- obtain a user's balance
-SELECT balance FROM "users" WHERE id = $1
+SELECT
+    balance
+FROM
+    "users"
+WHERE
+    id = $1

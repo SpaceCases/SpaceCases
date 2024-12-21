@@ -1,1 +1,5 @@
-SELECT count(*) FROM "users" AS count;
+SELECT
+    count(*)
+FROM
+    "users" AS count;
+
