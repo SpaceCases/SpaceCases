@@ -39,10 +39,11 @@ async def inventory(
         target_user = user
 
     # check target user exists
-    does_user_exist = (
-        await bot.db.fetch_from_file("does_user_exist.sql", target_user.id)
-    )[0]["exists"]
-    if not does_user_exist:
+    capacity_result = await bot.db.fetch_from_file(
+        "inventory/capacity.sql", target_user.id
+    )
+
+    if len(capacity_result) == 0:
         if target_user.id == interaction.user.id:
             await send_err_embed(
                 interaction,
@@ -53,8 +54,9 @@ async def inventory(
                 interaction,
                 f"{target_user.display_name} is **not** registered",
             )
-            return
+        return
 
+    capacity = capacity_result[0]["inventory_capacity"]
     # if no item, then we display inventory overview
     if item_name is None:
         skins_result = await bot.db.fetch_from_file(
@@ -106,7 +108,11 @@ async def inventory(
             for sticker in stickers_result
         )
         inventory_value = skins_value + stickers_value
-        e.description = f"Total Value: **{currency_str_format(inventory_value)}**"
+        # determine how many slots used
+        slots_used = sum(len(skin["floats"]) for skin in skins_result) + sum(
+            sticker["count"] for sticker in stickers_result
+        )
+        e.description = f"Total Value: **{currency_str_format(inventory_value)}**\nSlots Used: **{slots_used}/{capacity}**"
         await interaction.response.send_message(embed=e)
     else:
         # otherwise show specific information for that item

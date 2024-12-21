@@ -62,7 +62,7 @@ class OpenView(discord.ui.View):
                 self.item_unformatted_name,
             )
         # no space left/not registered
-        if len(result) == 0:
+        if not result[0]["inserted"]:
             await send_err_embed(
                 interaction,
                 "You don't have enough inventory space for this action!",
