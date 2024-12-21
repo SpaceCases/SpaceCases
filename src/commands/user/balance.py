@@ -5,9 +5,7 @@ from src.util.embed import send_err_embed
 from typing import Optional
 
 
-async def balance(
-    bot: SpaceCasesBot, interaction: discord.Interaction, user: Optional[discord.User]
-) -> None:
+async def balance(bot: SpaceCasesBot, interaction: discord.Interaction, user: Optional[discord.User]) -> None:
     if user is None:
         target_user = interaction.user
     else:

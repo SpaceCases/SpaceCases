@@ -41,9 +41,7 @@ class OpenView(discord.ui.View):
         super().__init__(timeout=30)
 
     @discord.ui.button(label="Add To Inventory", style=discord.ButtonStyle.green)
-    async def add_to_inventory(
-        self, interaction: discord.Interaction, button: discord.ui.Button
-    ) -> None:
+    async def add_to_inventory(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
@@ -70,9 +68,7 @@ class OpenView(discord.ui.View):
             )
         else:
             message = await self.interaction.original_response()
-            e = discord.Embed(
-                title=self.item.formatted_name, color=discord.Color.green()
-            )
+            e = discord.Embed(title=self.item.formatted_name, color=discord.Color.green())
             e.add_field(name="Price", value=currency_str_format(self.item.price))
             if isinstance(self.item, SkinMetadatum):
                 e.description = self.item.description
@@ -86,13 +82,9 @@ class OpenView(discord.ui.View):
             self.responded = True
 
     async def sell(self) -> None:
-        await self.db.execute_from_file(
-            "change_balance.sql", self.interaction.user.id, self.item.price
-        )
+        await self.db.execute_from_file("change_balance.sql", self.interaction.user.id, self.item.price)
         message = await self.interaction.original_response()
-        e = discord.Embed(
-            title=f"{self.item.formatted_name} - Sold!", color=discord.Color.dark_grey()
-        )
+        e = discord.Embed(title=f"{self.item.formatted_name} - Sold!", color=discord.Color.dark_grey())
         e.add_field(name="Price", value=currency_str_format(self.item.price))
         if isinstance(self.item, SkinMetadatum):
             e.description = self.item.description
@@ -105,9 +97,7 @@ class OpenView(discord.ui.View):
         await message.edit(embed=e, view=None)
 
     @discord.ui.button(label="Sell", style=discord.ButtonStyle.red)
-    async def sell_callback(
-        self, interaction: discord.Interaction, button: discord.ui.Button
-    ) -> None:
+    async def sell_callback(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
@@ -132,11 +122,7 @@ async def open(
         price += KEY_PRICE
 
     # try and deduct price
-    price_deducted: Optional[bool] = (
-        await bot.db.fetch_from_file(
-            "try_deduct_balance.sql", interaction.user.id, price
-        )
-    )[0]["result"]
+    price_deducted: Optional[bool] = (await bot.db.fetch_from_file("try_deduct_balance.sql", interaction.user.id, price))[0]["result"]
     if price_deducted is None:
         await send_err_embed(
             interaction,
@@ -200,9 +186,7 @@ async def open(
 
         # if it has a phase, obtain it
         if isinstance(container_entry.phase_group, PhaseGroup):
-            phase = remove_skin_name_formatting(
-                random.choice(container_entry.phase_group.get_phases())
-            )
+            phase = remove_skin_name_formatting(random.choice(container_entry.phase_group.get_phases()))
             unformatted_name = container_entry.unformatted_name + phase + condition
         else:
             unformatted_name = container_entry.unformatted_name + condition
@@ -248,9 +232,7 @@ async def open(
     )
 
 
-async def open_name_autocomplete(
-    bot: SpaceCasesBot, current: str
-) -> list[discord.app_commands.Choice]:
+async def open_name_autocomplete(bot: SpaceCasesBot, current: str) -> list[discord.app_commands.Choice]:
     unformatted_current = remove_skin_name_formatting(current)
     if len(unformatted_current) == 0:
         options = random.sample(bot.container_unformatted_names, 25)

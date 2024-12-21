@@ -9,12 +9,8 @@ SQL_QUERIES_DIRECTORY = os.path.join("src", "sql")
 
 class Database:
     @classmethod
-    async def create(
-        self, user: str, password: str, database: str, host: str, port: str
-    ) -> "Database":
-        pool = await asyncpg.create_pool(
-            user=user, password=password, database=database, host=host, port=port
-        )
+    async def create(self, user: str, password: str, database: str, host: str, port: str) -> "Database":
+        pool = await asyncpg.create_pool(user=user, password=password, database=database, host=host, port=port)
 
         if pool is None:
             logger.error("Database pool is None. Cannot execute queries.")
@@ -36,9 +32,7 @@ class Database:
         if len(params) == 0:
             logger.debug(f"Ran execute query from file: '{filename}'")
         else:
-            logger.debug(
-                f"Ran execute query from file: '{filename}' with params: {', '.join(map(str, params))}"
-            )
+            logger.debug(f"Ran execute query from file: '{filename}' with params: {', '.join(map(str, params))}")
 
     async def _fetch(self, query: str, *params: Any) -> list[Record]:
         async with self.pool.acquire() as connection:
@@ -51,9 +45,7 @@ class Database:
         if len(params) == 0:
             logger.debug(f"Ran fetch query from file: '{filename}'")
         else:
-            logger.debug(
-                f"Ran fetch query from file: '{filename}' with params: {', '.join(map(str, params))}"
-            )
+            logger.debug(f"Ran fetch query from file: '{filename}' with params: {', '.join(map(str, params))}")
         return val
 
     async def close(self) -> None:

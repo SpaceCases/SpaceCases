@@ -46,19 +46,13 @@ async def transfer(
             # check we have enough balance
             balance = rows[0]["balance"]
             if balance < cents:
-                await send_err_embed(
-                    interaction, "You **do not** have enough balance for this action"
-                )
+                await send_err_embed(interaction, "You **do not** have enough balance for this action")
                 return
 
             # give their balance
-            rows = await bot.db.fetch_from_file(
-                "change_balance.sql", recipient.id, cents
-            )
+            rows = await bot.db.fetch_from_file("change_balance.sql", recipient.id, cents)
             if len(rows) == 0:
-                await send_err_embed(
-                    interaction, f"{recipient.display_name} is **not** registered!"
-                )
+                await send_err_embed(interaction, f"{recipient.display_name} is **not** registered!")
                 return
             new_recipient_balance = rows[0]["balance"]
             # remove our balance

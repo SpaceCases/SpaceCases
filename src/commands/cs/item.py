@@ -36,17 +36,13 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str) 
             color=get_rarity_embed_color(item_metadata.rarity),
         )
         e.add_field(name="Price", value=currency_str_format(item_metadata.price))
-        e.add_field(
-            name="Rarity", value=item_metadata.rarity.get_name_for_regular_item()
-        )
+        e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_regular_item())
         e.set_image(url=item_metadata.image_url)
 
     await interaction.response.send_message(embed=e)
 
 
-async def item_name_autocomplete(
-    bot: SpaceCasesBot, current: str
-) -> list[discord.app_commands.Choice]:
+async def item_name_autocomplete(bot: SpaceCasesBot, current: str) -> list[discord.app_commands.Choice]:
     unformatted_current = remove_skin_name_formatting(current)
     if len(unformatted_current) == 0:
         options = random.sample(bot.item_unformatted_names, 25)

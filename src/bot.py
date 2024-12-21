@@ -26,10 +26,7 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
         user = interaction.user
         guild = interaction.guild if interaction.guild else "DM"
         # Check if it's a slash command and log the parameters
-        if (
-            interaction.type == discord.InteractionType.application_command
-            and interaction.command is not None
-        ):
+        if interaction.type == discord.InteractionType.application_command and interaction.command is not None:
             command_name = interaction.command.name
             if interaction.data is not None:
                 options = interaction.data.get("options", [])
@@ -42,20 +39,14 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
             else:
                 parameters = options
 
-            logger.debug(
-                f"Slash command '{command_name}' invoked by {user} ({user.id}) in {guild} with parameters: {parameters}"
-            )
+            logger.debug(f"Slash command '{command_name}' invoked by {user} ({user.id}) in {guild} with parameters: {parameters}")
 
         else:
             # Other interaction types
-            logger.debug(
-                f"Interaction '{interaction.type}' invoked by {user} ({user.id}) in {guild}"
-            )
+            logger.debug(f"Interaction '{interaction.type}' invoked by {user} ({user.id}) in {guild}")
         return True
 
-    async def on_error(
-        self, interaction: discord.Interaction, error: app_commands.AppCommandError
-    ) -> None:
+    async def on_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError) -> None:
         logger.error(f"{error}")
         e = discord.Embed(
             title="An error occurred!",
@@ -70,9 +61,7 @@ class SpaceCasesBot(commands.Bot):
     def __init__(self, pool: Database, test_guild: Optional[str]):
         intents = discord.Intents.default()
         intents.message_content = True
-        super().__init__(
-            command_prefix="", intents=intents, tree_cls=SpaceCasesCommandTree
-        )
+        super().__init__(command_prefix="", intents=intents, tree_cls=SpaceCasesCommandTree)
         self.db = pool
         # items
         self.item_metadata: dict[str, ItemMetadatum] = {}
@@ -92,9 +81,7 @@ class SpaceCasesBot(commands.Bot):
         skin_metadata = get_skin_metadata()
         sticker_metadata = get_sticker_metadata()
         self.item_metadata = skin_metadata | sticker_metadata
-        self.item_unformatted_names = list(skin_metadata.keys()) + list(
-            sticker_metadata.keys()
-        )
+        self.item_unformatted_names = list(skin_metadata.keys()) + list(sticker_metadata.keys())
         self.item_trie = Trie(self.item_unformatted_names)
 
     def refresh_containers(self) -> None:
@@ -102,11 +89,7 @@ class SpaceCasesBot(commands.Bot):
         souvenir_packages = get_souvenir_packages()
         sticker_capsules = get_sticker_capsules()
         self.containers = skin_cases | souvenir_packages | sticker_capsules
-        self.container_unformatted_names = (
-            list(skin_cases.keys())
-            + list(souvenir_packages.keys())
-            + list(sticker_capsules.keys())
-        )
+        self.container_unformatted_names = list(skin_cases.keys()) + list(souvenir_packages.keys()) + list(sticker_capsules.keys())
         self.container_trie = Trie(self.container_unformatted_names)
 
     @tasks.loop(minutes=15)
@@ -121,11 +104,7 @@ class SpaceCasesBot(commands.Bot):
             case 0:
                 await self.change_presence(activity=discord.Game(name="/register"))
             case 1:
-                await self.change_presence(
-                    activity=discord.Game(
-                        name=f"{self.user_count} users | {len(self.guilds)} servers"
-                    )
-                )
+                await self.change_presence(activity=discord.Game(name=f"{self.user_count} users | {len(self.guilds)} servers"))
 
     async def close(self) -> None:
         if self.user:
@@ -141,15 +120,11 @@ class SpaceCasesBot(commands.Bot):
             logger.info(f"Syncing commands for guild with id: {self.test_guild}...")
             self.tree.copy_global_to(guild=guild)
             synced = await self.tree.sync(guild=guild)
-            logger.info(
-                f"Successfully synced the following commands for {self.test_guild}: {synced}"
-            )
+            logger.info(f"Successfully synced the following commands for {self.test_guild}: {synced}")
         else:
             logger.info("Syncing commands globally...")
             synced = await self.tree.sync()
-            logger.info(
-                f"Successfully synced the following commands globally: {synced}"
-            )
+            logger.info(f"Successfully synced the following commands globally: {synced}")
         for command in synced:
             self.command_ids[command.name] = command.id
         self.refresh_data_loop.start()
@@ -183,10 +158,7 @@ Enjoy! - [Spacerulerwill](https://github.com/Spacerulerwill)""",
 
     async def on_guild_join(self, guild: discord.Guild) -> None:
         logger.info(f"Joined new guild {guild.name} ({guild.id})")
-        if (
-            guild.system_channel
-            and guild.system_channel.permissions_for(guild.me).send_messages
-        ):
+        if guild.system_channel and guild.system_channel.permissions_for(guild.me).send_messages:
             await guild.system_channel.send(embed=self.get_welcome_embed())
         else:
             if guild.owner:

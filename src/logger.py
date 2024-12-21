@@ -10,9 +10,7 @@ def _init_logging() -> logging.Logger:
     # Create logger
     logger = logging.getLogger("SpaceCases")
     logger.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
     # File handler
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]

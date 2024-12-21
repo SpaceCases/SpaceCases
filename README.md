@@ -28,7 +28,7 @@ git clone https://github.com/SpaceCases/SpaceCases          # Clone repository t
 cd SpaceCases                                               # Move into directory
 python -m venv env                                          # Create the virtual environment
 source env/bin/activate                                     # Activate virtual environment
-python -m pip install -r requirements.txt                   # Install dependencies
+python -m pip install .                                     # Install dependencies
 mv .env.example .env                                        # Rename .env.example to .env
 psql -U user -h host -d database_name -f src/sql/init.sql   # Run init.sql file to setup database
 ```
