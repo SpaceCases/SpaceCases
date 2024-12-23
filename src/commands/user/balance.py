@@ -1,5 +1,6 @@
 import discord
 from src.bot import SpaceCasesBot
+from src.database import BALANCE
 from src.util.string import currency_str_format
 from src.util.embed import send_err_embed
 from typing import Optional
@@ -13,7 +14,7 @@ async def balance(
     else:
         target_user = user
 
-    rows = await bot.db.fetch_from_file("balance.sql", target_user.id)
+    rows = await bot.db.fetch_from_file(BALANCE, target_user.id)
     if len(rows) > 0:
         balance = rows[0]["balance"]
         e = discord.Embed(

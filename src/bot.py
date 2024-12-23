@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands, tasks
 from discord import app_commands
 from src.logger import logger
-from src.database import Database
+from src.database import Database, COUNT_USERS
 from src.assets import (
     get_skin_metadata,
     get_sticker_metadata,
@@ -63,7 +63,6 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
             color=discord.Color.red(),
         )
         await interaction.response.send_message(embed=e, ephemeral=True)
-        raise error
 
 
 class SpaceCasesBot(commands.Bot):
@@ -134,7 +133,7 @@ class SpaceCasesBot(commands.Bot):
             logger.info("Goodbye!")
 
     async def setup_hook(self) -> None:
-        self.user_count = (await self.db.fetch_from_file("count_users.sql"))[0]["count"]
+        self.user_count = (await self.db.fetch_from_file(COUNT_USERS))[0]["count"]
         await self._load_cogs()
         if self.test_guild is not None:
             guild = discord.Object(id=self.test_guild)

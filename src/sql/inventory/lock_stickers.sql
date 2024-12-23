@@ -1,0 +1,1 @@
+LOCK TABLE stickers IN EXCLUSIVE MODE;

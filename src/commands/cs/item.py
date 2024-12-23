@@ -12,35 +12,35 @@ from spacecases_common import (
 
 
 async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str) -> None:
+    # remove our items name formatting
     unformatted_name = remove_skin_name_formatting(name)
-    if unformatted_name not in bot.item_metadata:
-        await send_err_embed(interaction, f"No item exists with name: `{name}`")
+    # check our item exists
+    try:
+        item_metadata = bot.item_metadata[unformatted_name]
+    except KeyError:
+        await send_err_embed(interaction, f"Item `{name}` does **not** exist")
         return
+    # create the embed to send to the user
     item_metadata = bot.item_metadata[unformatted_name]
+    e = discord.Embed(
+        title=item_metadata.formatted_name,
+        color=get_rarity_embed_color(item_metadata.rarity),
+    )
+    e.set_image(url=item_metadata.image_url)
+    e.add_field(name="Price", value=currency_str_format(item_metadata.price))
+    # if its a skin, it has a rarity and float range
     if isinstance(item_metadata, SkinMetadatum):
-        e = discord.Embed(
-            title=item_metadata.formatted_name,
-            description=item_metadata.description,
-            color=get_rarity_embed_color(item_metadata.rarity),
-        )
-        e.add_field(name="Price", value=currency_str_format(item_metadata.price))
         e.add_field(name="Rarity", value=item_metadata.rarity.get_name_for_skin())
         e.add_field(
             name="Float Range",
             value=f"{item_metadata.min_float:.2f} - {item_metadata.max_float:.2f}",
         )
-        e.set_image(url=item_metadata.image_url)
+        e.description = item_metadata.description
+    # if its a sticker, only a rarity
     elif isinstance(item_metadata, StickerMetadatum):
-        e = discord.Embed(
-            title=item_metadata.formatted_name,
-            color=get_rarity_embed_color(item_metadata.rarity),
-        )
-        e.add_field(name="Price", value=currency_str_format(item_metadata.price))
         e.add_field(
             name="Rarity", value=item_metadata.rarity.get_name_for_regular_item()
         )
-        e.set_image(url=item_metadata.image_url)
-
     await interaction.response.send_message(embed=e)
 
 

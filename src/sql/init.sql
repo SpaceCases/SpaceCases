@@ -1,24 +1,24 @@
 CREATE TABLE users (
-    id bigint PRIMARY KEY,
-    last_claim date NOT NULL,
-    claim_streak int NOT NULL,
-    balance bigint NOT NULL,
-    inventory_capacity bigint NOT NULL
+    id BIGINT PRIMARY KEY,
+    last_claim DATE NOT NULL,
+    claim_streak INT NOT NULL,
+    balance BIGINT NOT NULL,
+    inventory_capacity BIGINT NOT NULL
 );
 
 CREATE TABLE skins (
-    owner_id bigint NOT NULL,
-    name text NOT NULL,
-    floats real[] NOT NULL,
-    PRIMARY KEY (owner_id, name),
+    id BIGSERIAL PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    name TEXT NOT NULL,
+    float FLOAT NOT NULL,
+    custom_name TEXT,
     FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE stickers (
-    owner_id bigint NOT NULL,
-    name text NOT NULL,
-    count bigint NOT NULL,
-    PRIMARY KEY (owner_id, name),
+    id BIGSERIAL PRIMARY KEY,
+    owner_id BIGINT NOT NULL,
+    name TEXT NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
 );
 

@@ -1,5 +1,6 @@
 import discord
 from src.bot import SpaceCasesBot
+from src.database import DOES_USER_EXIST, CLOSE
 from src.util.embed import (
     yes_no_embed,
     create_success_embed,
@@ -13,7 +14,7 @@ RESPONSE_TIME = 30
 async def close(bot: SpaceCasesBot, interaction: discord.Interaction) -> None:
     # check if user has an accout to delete
     does_user_exist = (
-        await bot.db.fetch_from_file("does_user_exist.sql", interaction.user.id)
+        await bot.db.fetch_from_file(DOES_USER_EXIST, interaction.user.id)
     )[0]["exists"]
     if not does_user_exist:
         await send_err_embed(interaction, "You **don't** have an account delete")
@@ -24,7 +25,7 @@ async def close(bot: SpaceCasesBot, interaction: discord.Interaction) -> None:
         await interaction.response.edit_message(embed=new_embed, view=None)
 
     async def on_yes(interaction: discord.Interaction) -> None:
-        rows = await bot.db.fetch_from_file("close.sql", interaction.user.id)
+        rows = await bot.db.fetch_from_file(CLOSE, interaction.user.id)
         if len(rows) > 0:
             new_embed = create_success_embed(
                 "You have successfully **deleted** your account"

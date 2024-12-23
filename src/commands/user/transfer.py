@@ -1,6 +1,7 @@
 import discord
 import re
 from src.bot import SpaceCasesBot
+from src.database import BALANCE_FOR_UPDATE, CHANGE_BALANCE
 from src.util.embed import send_err_embed
 from src.util.string import currency_str_format
 from decimal import Decimal
@@ -35,7 +36,9 @@ async def transfer(
     async with bot.db.pool.acquire() as connection:
         async with connection.transaction(isolation="serializable"):
             # check we exist
-            rows = await bot.db.fetch_from_file("balance.sql", interaction.user.id)
+            rows = await bot.db.fetch_from_file_with_connection(
+                BALANCE_FOR_UPDATE, connection, interaction.user.id
+            )
             if len(rows) == 0:
                 await send_err_embed(
                     interaction,
@@ -52,8 +55,8 @@ async def transfer(
                 return
 
             # give their balance
-            rows = await bot.db.fetch_from_file(
-                "change_balance.sql", recipient.id, cents
+            rows = await bot.db.fetch_from_file_with_connection(
+                CHANGE_BALANCE, connection, recipient.id, cents
             )
             if len(rows) == 0:
                 await send_err_embed(
@@ -61,13 +64,17 @@ async def transfer(
                 )
                 return
             new_recipient_balance = rows[0]["balance"]
+
             # remove our balance
-            rows = await bot.db.fetch_from_file(
-                "change_balance.sql",
+            rows = await bot.db.fetch_from_file_with_connection(
+                CHANGE_BALANCE,
+                connection,
                 interaction.user.id,
                 -cents,
             )
             new_sender_balance = rows[0]["balance"]
+
+    # send result embed
     e = discord.Embed(
         description=f"Successfully transferred **{currency_str_format(cents)}** to {recipient.display_name}",
         color=discord.Colour.green(),

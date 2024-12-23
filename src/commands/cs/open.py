@@ -3,10 +3,18 @@ import random
 from typing import Optional
 from itertools import islice
 from src.bot import SpaceCasesBot
+from src.database import (
+    ADD_SKIN,
+    ADD_STICKER,
+    DOES_USER_EXIST_FOR_UPDATE,
+    LOCK_SKINS,
+    LOCK_STICKERS,
+    CHANGE_BALANCE,
+    TRY_DEDUCT_BALANCE,
+)
 from src.util.embed import get_rarity_embed_color, send_err_embed
 from src.util.string import currency_str_format
 from src.util.constants import KEY_PRICE
-from src.database import Database
 from spacecases_common import (
     remove_skin_name_formatting,
     SkinContainerEntry,
@@ -25,7 +33,7 @@ class OpenView(discord.ui.View):
     def __init__(
         self,
         interaction: discord.Interaction,
-        db: Database,
+        bot: SpaceCasesBot,
         container: Container,
         item: ItemMetadatum,
         item_unformatted_name: str,
@@ -33,7 +41,7 @@ class OpenView(discord.ui.View):
     ):
         self.interaction = interaction
         self.item = item
-        self.db = db
+        self.bot = bot
         self.container = container
         self.item_unformatted_name = item_unformatted_name
         self.float = float
@@ -44,51 +52,78 @@ class OpenView(discord.ui.View):
     async def add_to_inventory(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ) -> None:
+        # check its the right person who can interact
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
+
         # add the item to our inventory
         if isinstance(self.item, SkinMetadatum):
-            result = await self.db.fetch_from_file(
-                "inventory/add_skin.sql",
-                self.interaction.user.id,
-                self.item_unformatted_name,
-                self.float,
-            )
+            query = ADD_SKIN
+            args = [self.interaction.user.id, self.item_unformatted_name, self.float]
         elif isinstance(self.item, StickerMetadatum):
-            result = await self.db.fetch_from_file(
-                "inventory/add_sticker.sql",
-                self.interaction.user.id,
-                self.item_unformatted_name,
-            )
-        # no space left/not registered
-        if not result[0]["inserted"]:
-            await send_err_embed(
-                interaction,
-                "You don't have enough inventory space for this action!",
-                ephemeral=True,
-            )
-        else:
-            message = await self.interaction.original_response()
-            e = discord.Embed(
-                title=self.item.formatted_name, color=discord.Color.green()
-            )
-            e.add_field(name="Price", value=currency_str_format(self.item.price))
-            if isinstance(self.item, SkinMetadatum):
-                e.description = self.item.description
-                e.add_field(name="Float", value=str(self.float))
-            e.set_image(url=self.item.image_url)
-            e.set_footer(
-                text=f"Unboxed by {self.interaction.user.display_name}",
-                icon_url=self.interaction.user.display_avatar.url,
-            )
-            await message.edit(embed=e, view=None)
-            self.responded = True
+            query = ADD_STICKER
+            args = [self.interaction.user.id, self.item_unformatted_name]
 
-    async def sell(self) -> None:
-        await self.db.execute_from_file(
-            "change_balance.sql", self.interaction.user.id, self.item.price
+        async with self.bot.db.pool.acquire() as connection:
+            async with connection.transaction(isolation="serializable"):
+                # check we exist
+                rows = await self.bot.db.fetch_from_file_with_connection(
+                    DOES_USER_EXIST_FOR_UPDATE,
+                    connection,
+                    interaction.user.id,
+                )
+                if not rows[0]["exists"]:
+                    await send_err_embed(
+                        interaction,
+                        f"You are **not** registered. Use {self.bot.get_slash_command_mention_string('register')} to register!",
+                        ephemeral=True,
+                    )
+                    return
+
+                # lock the skins and stickers tables
+                await self.bot.db.execute_from_file_with_connection(
+                    LOCK_SKINS, connection
+                )
+                await self.bot.db.execute_from_file_with_connection(
+                    LOCK_STICKERS, connection
+                )
+
+                # add item
+                rows = await self.bot.db.fetch_from_file_with_connection(
+                    query,
+                    connection,
+                    *args,
+                )
+                # no space
+                if len(rows) == 0:
+                    await send_err_embed(
+                        interaction,
+                        "You don't have enough inventory space for this action!",
+                        ephemeral=True,
+                    )
+                    return
+
+        message = await self.interaction.original_response()
+        e = discord.Embed(title=self.item.formatted_name, color=discord.Color.green())
+        e.add_field(name="Price", value=currency_str_format(self.item.price))
+        if isinstance(self.item, SkinMetadatum):
+            e.description = self.item.description
+            e.add_field(name="Float", value=str(self.float))
+        e.set_image(url=self.item.image_url)
+        e.set_footer(
+            text=f"Unboxed by {self.interaction.user.display_name}",
+            icon_url=self.interaction.user.display_avatar.url,
         )
+        await message.edit(embed=e, view=None)
+        self.responded = True
+
+    async def sell(self, give_up: bool) -> bool:
+        rows = await self.bot.db.fetch_from_file(
+            CHANGE_BALANCE, self.interaction.user.id, self.item.price
+        )
+        if len(rows) == 0 and not give_up:
+            return False
         message = await self.interaction.original_response()
         e = discord.Embed(
             title=f"{self.item.formatted_name} - Sold!", color=discord.Color.dark_grey()
@@ -103,6 +138,7 @@ class OpenView(discord.ui.View):
             icon_url=self.interaction.user.display_avatar.url,
         )
         await message.edit(embed=e, view=None)
+        return True
 
     @discord.ui.button(label="Sell", style=discord.ButtonStyle.red)
     async def sell_callback(
@@ -111,13 +147,19 @@ class OpenView(discord.ui.View):
         if interaction.user != self.interaction.user:
             await send_err_embed(interaction, "This is not your button!", True)
             return
-        await self.sell()
+        if not await self.sell(give_up=False):
+            await send_err_embed(
+                interaction,
+                f"You are **not** registered. Use {self.bot.get_slash_command_mention_string('register')} to register!",
+                ephemeral=True,
+            )
+            return
         self.responded = True
 
     async def on_timeout(self) -> None:
         if self.responded:
             return
-        await self.sell()
+        await self.sell(give_up=True)
 
 
 async def open(
@@ -132,23 +174,22 @@ async def open(
         price += KEY_PRICE
 
     # try and deduct price
-    price_deducted: Optional[bool] = (
-        await bot.db.fetch_from_file(
-            "try_deduct_balance.sql", interaction.user.id, price
-        )
-    )[0]["result"]
-    if price_deducted is None:
+    rows = await bot.db.fetch_from_file(TRY_DEDUCT_BALANCE, interaction.user.id, price)
+    if len(rows) == 0:
         await send_err_embed(
             interaction,
             f"You are **not** registered. Use {bot.get_slash_command_mention_string('register')} to register!",
         )
         return
-    if not price_deducted:
+
+    # dont have enough
+    if not rows[0]["deducted"]:
         await send_err_embed(
             interaction,
             f"You do **not** have enough balance to buy a **{container.formatted_name}**",
         )
         return
+
     # generate probability table (maybe move to asset generation?)
     cumulative_probabilities = {}
     cumulative_probability = 0
@@ -239,7 +280,7 @@ async def open(
         embed=e,
         view=OpenView(
             interaction,
-            bot.db,
+            bot,
             container,
             item_metadatum,
             unformatted_name,
