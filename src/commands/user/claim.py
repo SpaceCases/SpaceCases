@@ -3,16 +3,13 @@ from src.bot import SpaceCasesBot
 from src.database import CLAIM
 from src.util.embed import send_err_embed
 from src.util.string import currency_str_format
+from src.exceptions import UserNotRegisteredError
 
 
 async def claim(bot: SpaceCasesBot, interaction: discord.Interaction) -> None:
     rows = await bot.db.fetch_from_file(CLAIM, interaction.user.id)
     if len(rows) == 0:
-        await send_err_embed(
-            interaction,
-            f"You are **not** registered. Use {bot.get_slash_command_mention_string('register')} to register!",
-        )
-        return
+        raise UserNotRegisteredError(interaction.user)
 
     row = rows[0]
     if row["claimed"]:

@@ -5,6 +5,7 @@ from src.database import BALANCE_FOR_UPDATE, CHANGE_BALANCE
 from src.util.embed import send_err_embed
 from src.util.string import currency_str_format
 from decimal import Decimal
+from src.exceptions import UserNotRegisteredError, InsufficientBalanceError
 
 
 async def transfer(
@@ -40,29 +41,20 @@ async def transfer(
                 BALANCE_FOR_UPDATE, connection, interaction.user.id
             )
             if len(rows) == 0:
-                await send_err_embed(
-                    interaction,
-                    f"You are **not** registered. Use {bot.get_slash_command_mention_string('register')} to register!",
-                )
-                return
+                raise UserNotRegisteredError(interaction.user)
 
             # check we have enough balance
             balance = rows[0]["balance"]
             if balance < cents:
-                await send_err_embed(
-                    interaction, "You **do not** have enough balance for this action"
-                )
-                return
+                raise InsufficientBalanceError
 
             # give their balance
             rows = await bot.db.fetch_from_file_with_connection(
                 CHANGE_BALANCE, connection, recipient.id, cents
             )
             if len(rows) == 0:
-                await send_err_embed(
-                    interaction, f"{recipient.display_name} is **not** registered!"
-                )
-                return
+                raise UserNotRegisteredError(recipient)
+
             new_recipient_balance = rows[0]["balance"]
 
             # remove our balance

@@ -11,6 +11,8 @@ from src.assets import (
     get_souvenir_packages,
     get_sticker_capsules,
 )
+from src.util.embed import send_err_embed
+from src.exceptions import InsufficientBalanceError, UserNotRegisteredError
 from marisa_trie import Trie
 from spacecases_common import (
     ItemMetadatum,
@@ -21,6 +23,8 @@ from typing import Any, Optional
 
 
 class SpaceCasesCommandTree(app_commands.CommandTree):
+    client: "SpaceCasesBot"
+
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         # Debug logging
         user = interaction.user
@@ -56,13 +60,24 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
     async def on_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
     ) -> None:
-        logger.error(f"{error}")
-        e = discord.Embed(
-            title="An error occurred!",
-            description="It has been reported automatically",
-            color=discord.Color.red(),
-        )
-        await interaction.response.send_message(embed=e, ephemeral=True)
+        if isinstance(error, UserNotRegisteredError):
+            if interaction.user.id == error.user.id:
+                message = f"You are **not** registered. Use {self.client.get_slash_command_mention_string('register')} to register!"
+            else:
+                message = f"{error.user.display_name} is **not** registered"
+            await send_err_embed(interaction, message)
+        elif isinstance(error, InsufficientBalanceError):
+            await send_err_embed(
+                interaction, "You **do not** have sufficient balance for this action"
+            )
+        else:
+            logger.error(f"{error}")
+            e = discord.Embed(
+                title="An error occurred!",
+                description="It has been reported automatically",
+                color=discord.Color.red(),
+            )
+            await interaction.response.send_message(embed=e, ephemeral=True)
 
 
 class SpaceCasesBot(commands.Bot):

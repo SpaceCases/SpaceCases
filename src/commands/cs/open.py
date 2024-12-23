@@ -15,6 +15,7 @@ from src.database import (
 from src.util.embed import get_rarity_embed_color, send_err_embed
 from src.util.string import currency_str_format
 from src.util.constants import KEY_PRICE
+from src.exceptions import UserNotRegisteredError, InsufficientBalanceError
 from spacecases_common import (
     remove_skin_name_formatting,
     SkinContainerEntry,
@@ -74,12 +75,7 @@ class OpenView(discord.ui.View):
                     interaction.user.id,
                 )
                 if not rows[0]["exists"]:
-                    await send_err_embed(
-                        interaction,
-                        f"You are **not** registered. Use {self.bot.get_slash_command_mention_string('register')} to register!",
-                        ephemeral=True,
-                    )
-                    return
+                    raise UserNotRegisteredError(interaction.user)
 
                 # lock the skins and stickers tables
                 await self.bot.db.execute_from_file_with_connection(
@@ -148,12 +144,8 @@ class OpenView(discord.ui.View):
             await send_err_embed(interaction, "This is not your button!", True)
             return
         if not await self.sell(give_up=False):
-            await send_err_embed(
-                interaction,
-                f"You are **not** registered. Use {self.bot.get_slash_command_mention_string('register')} to register!",
-                ephemeral=True,
-            )
-            return
+            raise UserNotRegisteredError(self.interaction.user)
+
         self.responded = True
 
     async def on_timeout(self) -> None:
@@ -176,19 +168,11 @@ async def open(
     # try and deduct price
     rows = await bot.db.fetch_from_file(TRY_DEDUCT_BALANCE, interaction.user.id, price)
     if len(rows) == 0:
-        await send_err_embed(
-            interaction,
-            f"You are **not** registered. Use {bot.get_slash_command_mention_string('register')} to register!",
-        )
-        return
+        raise UserNotRegisteredError(interaction.user)
 
     # dont have enough
     if not rows[0]["deducted"]:
-        await send_err_embed(
-            interaction,
-            f"You do **not** have enough balance to buy a **{container.formatted_name}**",
-        )
-        return
+        raise InsufficientBalanceError
 
     # generate probability table (maybe move to asset generation?)
     cumulative_probabilities = {}

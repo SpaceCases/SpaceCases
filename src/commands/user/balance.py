@@ -2,8 +2,8 @@ import discord
 from src.bot import SpaceCasesBot
 from src.database import BALANCE
 from src.util.string import currency_str_format
-from src.util.embed import send_err_embed
 from typing import Optional
+from src.exceptions import UserNotRegisteredError
 
 
 async def balance(
@@ -25,13 +25,4 @@ async def balance(
         e.add_field(name="Current Balance", value=currency_str_format(balance))
         await interaction.response.send_message(embed=e)
     else:
-        if target_user.id == interaction.user.id:
-            await send_err_embed(
-                interaction,
-                f"You are **not** registered. Use {bot.get_slash_command_mention_string('register')} to register!",
-            )
-        else:
-            await send_err_embed(
-                interaction,
-                f"{target_user.display_name} is **not** registered",
-            )
+        raise UserNotRegisteredError(target_user)
