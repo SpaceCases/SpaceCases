@@ -157,10 +157,16 @@ class OpenView(discord.ui.View):
 async def open(
     bot: SpaceCasesBot,
     interaction: discord.Interaction,
-    container_formatted_name: str,
+    name: str,
 ) -> None:
-    container_unformatted_name = remove_skin_name_formatting(container_formatted_name)
-    container = bot.containers[container_unformatted_name]
+    container_unformatted_name = remove_skin_name_formatting(name)
+
+    try:
+        container = bot.containers[container_unformatted_name]
+    except KeyError:
+        await send_err_embed(interaction, f"Container `{name}` does **not** exist")
+        return
+    
     price = container.price
     if container.requires_key:
         price += KEY_PRICE
