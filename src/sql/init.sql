@@ -11,7 +11,6 @@ CREATE TABLE skins (
     owner_id BIGINT NOT NULL,
     name TEXT NOT NULL,
     float FLOAT NOT NULL,
-    custom_name TEXT,
     FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
 );
 

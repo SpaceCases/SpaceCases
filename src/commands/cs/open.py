@@ -166,7 +166,7 @@ async def open(
     except KeyError:
         await send_err_embed(interaction, f"Container `{name}` does **not** exist")
         return
-    
+
     price = container.price
     if container.requires_key:
         price += KEY_PRICE

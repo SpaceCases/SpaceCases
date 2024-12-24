@@ -23,6 +23,10 @@ ADD_SKIN = "inventory/add_skin.sql"
 ADD_STICKER = "inventory/add_sticker.sql"
 LOCK_SKINS = "inventory/lock_skins.sql"
 LOCK_STICKERS = "inventory/lock_stickers.sql"
+GET_INVENTORY_CHECK_EXIST = "inventory/get_inventory_check_exist.sql"
+GET_INVENTORY = "inventory/get_inventory.sql"
+GET_SKIN = "inventory/get_skin.sql"
+GET_STICKER = "inventory/get_sticker.sql"
 
 
 class Database:
