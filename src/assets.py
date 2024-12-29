@@ -1,11 +1,9 @@
 import os
 import requests
+from pydantic import BaseModel
 from spacecases_common import (
     SkinMetadatum,
     StickerMetadatum,
-    SkinContainerEntry,
-    ItemContainerEntry,
-    Rarity,
     SkinCase,
     SouvenirPackage,
     StickerCapsule,
@@ -33,96 +31,32 @@ SOUVENIR_PACKAGE_METADATA_PATH = os.path.join(
 )
 
 
+# Helper function to parse the raw JSON data into a dictionary of model instances
+def parse_metadata[T: BaseModel](url: str, model: type[T]) -> dict[str, T]:
+    logger.info(f"Refreshing metadata from {url}...")
+    raw_json = requests.get(url).json()
+    metadata = {
+        key: model.model_validate(value) for key, value in raw_json.items()
+    } 
+    logger.info(f"Metadata refreshed from {url}")
+    return metadata
+
+
 def get_skin_metadata() -> dict[str, SkinMetadatum]:
-    logger.info("Refreshing skin metadata...")
-    skin_metadata = {}
-    raw_json = requests.get(SKIN_METADATA_PATH).json()
-    for unformatted_name, datum in raw_json.items():
-        skin_metadatum = SkinMetadatum(
-            datum["formatted_name"],
-            Rarity(datum["rarity"]),
-            datum["price"],
-            datum["image_url"],
-            datum["description"],
-            datum["min_float"],
-            datum["max_float"],
-        )
-        skin_metadata[unformatted_name] = skin_metadatum
-    logger.info("Skin metadata refreshed")
-    return skin_metadata
+    return parse_metadata(SKIN_METADATA_PATH, SkinMetadatum)
 
 
 def get_sticker_metadata() -> dict[str, StickerMetadatum]:
-    logger.info("Refreshing sticker metadata...")
-    sticker_metadata = {}
-    raw_json = requests.get(STICKER_METADATA_PATH).json()
-    for unformatted_name, datum in raw_json.items():
-        sticker_metadatum = StickerMetadatum(
-            datum["formatted_name"],
-            Rarity(datum["rarity"]),
-            datum["price"],
-            datum["image_url"],
-        )
-        sticker_metadata[unformatted_name] = sticker_metadatum
-    logger.info("Sticker metadata refreshed")
-    return sticker_metadata
+    return parse_metadata(STICKER_METADATA_PATH, StickerMetadatum)
 
 
 def get_skin_cases() -> dict[str, SkinCase]:
-    logger.info("Refreshing skin cases")
-    skin_cases = {}
-    raw_json = requests.get(SKIN_CASES_METADATA_PATH).json()
-    for unformatted_name, datum in raw_json.items():
-        skin_cases[unformatted_name] = SkinCase(
-            datum["formatted_name"],
-            datum["price"],
-            datum["image_url"],
-            datum["requires_key"],
-            {
-                Rarity(int(key)): [SkinContainerEntry(**item) for item in val]
-                for key, val in datum["contains"].items()
-            },
-            [SkinContainerEntry(**val) for val in datum["contains_rare"]],
-        )
-    logger.info("Skin cases refreshed")
-    return skin_cases
+    return parse_metadata(SKIN_CASES_METADATA_PATH, SkinCase)
 
 
 def get_souvenir_packages() -> dict[str, SouvenirPackage]:
-    logger.info("Refreshing souvenir packages...")
-    souvenir_packages = {}
-    raw_json = requests.get(SOUVENIR_PACKAGE_METADATA_PATH).json()
-    for unformatted_name, datum in raw_json.items():
-        souvenir_packages[unformatted_name] = SouvenirPackage(
-            datum["formatted_name"],
-            datum["price"],
-            datum["image_url"],
-            datum["requires_key"],
-            {
-                Rarity(int(key)): [SkinContainerEntry(**item) for item in val]
-                for key, val in datum["contains"].items()
-            },
-            [SkinContainerEntry(**val) for val in datum["contains_rare"]],
-        )
-    logger.info("Souvenir packages refreshed")
-    return souvenir_packages
+    return parse_metadata(SOUVENIR_PACKAGE_METADATA_PATH, SouvenirPackage)
 
 
 def get_sticker_capsules() -> dict[str, StickerCapsule]:
-    logger.info("Refreshing sticker capsules")
-    sticker_capsules = {}
-    raw_json = requests.get(STICKER_CAPSULE_METADATA_PATH).json()
-    for unformatted_name, datum in raw_json.items():
-        sticker_capsules[unformatted_name] = StickerCapsule(
-            datum["formatted_name"],
-            datum["price"],
-            datum["image_url"],
-            datum["requires_key"],
-            {
-                Rarity(int(key)): [ItemContainerEntry(**item) for item in val]
-                for key, val in datum["contains"].items()
-            },
-            [ItemContainerEntry(**val) for val in datum["contains_rare"]],
-        )
-    logger.info("Sticker capsules refreshed")
-    return sticker_capsules
+    return parse_metadata(STICKER_CAPSULE_METADATA_PATH, StickerCapsule)

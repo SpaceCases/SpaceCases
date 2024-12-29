@@ -9,7 +9,7 @@ dependencies = [
     "marisa-trie == 1.2.1",
     "python-dotenv == 1.0.1",
     "requests == 2.32.3",
-    "spacecases-common == 0.9.5",
+    "spacecases-common == 0.10.1",
     "types-requests == 2.32.0.20241016",
     "ruff == 0.8.4",
     "mypy == 1.14.0"

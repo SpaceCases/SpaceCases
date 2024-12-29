@@ -1,6 +1,6 @@
 import discord
 from itertools import batched, groupby
-from typing import Optional, Type
+from typing import Optional
 from src.bot import SpaceCasesBot
 from src.util.string import currency_str_format
 from src.util.constants import KEY_PRICE
@@ -41,7 +41,7 @@ def format_container(container: Container) -> str:
 
 
 def get_pages(
-    containers: dict[str, Container], container_types: set[Type[Container]]
+    containers: dict[str, Container], container_types: set[type[Container]]
 ) -> list[Page]:
     all_names = list(
         batched(
@@ -119,14 +119,17 @@ async def containers(
     container_type: Optional[discord.app_commands.Choice[str]],
 ) -> None:
     # Determine which container types to include based on the selection
+    selected_container_types: set[type[Container]] = set()
     if container_type is None:
-        selected_container_types = {SkinCase, SouvenirPackage, StickerCapsule}
+        selected_container_types = selected_container_types.union(
+            (SkinCase, SouvenirPackage, StickerCapsule)
+        )
     elif container_type.value == "cases":
-        selected_container_types = {SkinCase}
+        selected_container_types.add(SkinCase)
     elif container_type.value == "souvenirpackages":
-        selected_container_types = {SouvenirPackage}
+        selected_container_types.add(SouvenirPackage)
     elif container_type.value == "stickercapsules":
-        selected_container_types = {StickerCapsule}
+        selected_container_types.add(StickerCapsule)
 
     # Get pages based on selected container types
     pages = get_pages(bot.containers, selected_container_types)

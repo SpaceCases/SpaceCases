@@ -71,13 +71,13 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
                 interaction, "You **do not** have sufficient balance for this action"
             )
         else:
-            logger.error(f"{error}")
             e = discord.Embed(
                 title="An error occurred!",
                 description="It has been reported automatically",
                 color=discord.Color.red(),
             )
             await interaction.response.send_message(embed=e, ephemeral=True)
+            raise
 
 
 class SpaceCasesBot(commands.Bot):
