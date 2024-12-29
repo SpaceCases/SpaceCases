@@ -67,7 +67,7 @@ class OpenView(discord.ui.View):
             args = [self.interaction.user.id, self.item_unformatted_name]
 
         async with self.bot.db.pool.acquire() as connection:
-            async with connection.transaction(isolation="serializable"):
+            async with connection.transaction():
                 # check we exist
                 rows = await self.bot.db.fetch_from_file_with_connection(
                     DOES_USER_EXIST_FOR_UPDATE,
