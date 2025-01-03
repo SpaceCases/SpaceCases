@@ -7,13 +7,17 @@ from src.database import (
     GET_STICKER,
 )
 from src.util.embed import (
-    send_err_embed,
     send_skin_viewer,
     send_sticker_viewer,
 )
 from src.util.string import currency_str_format
 from src.util.types import SkinOwnership, StickerOwnership
-from src.exceptions import UserNotRegisteredError
+from src.exceptions import (
+    UserNotRegisteredError,
+    UserInventoryEmptyError,
+    ItemDoesNotExistError,
+    UserDoesNotOwnItemError,
+)
 from spacecases_common import (
     remove_skin_name_formatting,
     SkinMetadatum,
@@ -53,8 +57,7 @@ async def show_user_inventory(
 
     # empty inventory
     if len(skins) == 0 and len(stickers) == 0:
-        await send_err_embed(interaction, "Your inventory is **empty!**")
-        return
+        raise UserInventoryEmptyError(user)
 
     # create embed
     inventory_value = sum(bot.item_metadata[skin[0]].price for skin in skins) + sum(
@@ -97,8 +100,7 @@ async def show_item_from_user_inventory(
     try:
         item_metadatum = bot.item_metadata[unformatted_item_name]
     except KeyError:
-        await send_err_embed(interaction, f"Item `{item}` does **not** exist")
-        return
+        raise ItemDoesNotExistError(item)
 
     # send embed
     if isinstance(item_metadatum, SkinMetadatum):
@@ -110,11 +112,7 @@ async def show_item_from_user_inventory(
             raise UserNotRegisteredError(user)
         # user does not own this item
         if len(floats) == 0:
-            if user.id == interaction.user.id:
-                message = f"You do not own a `{item}`"
-            else:
-                message = f"{user.display_name} does not own a `{item}`"
-            await send_err_embed(interaction, message)
+            raise UserDoesNotOwnItemError(user, item)
         # send skin viewer embed
         await send_skin_viewer(interaction, SkinOwnership(user, item_metadatum, floats))
 
@@ -127,11 +125,7 @@ async def show_item_from_user_inventory(
             raise UserNotRegisteredError(user)
         # user does not own this item
         if count == 0:
-            if user.id == interaction.user.id:
-                message = f"You do not own a `{item}`"
-            else:
-                message = f"{user.display_name} does not own a `{item}`"
-            await send_err_embed(interaction, message)
+            raise UserDoesNotOwnItemError(user, item)
         # send sticker embed
         await send_sticker_viewer(
             interaction, StickerOwnership(user, item_metadatum, count)

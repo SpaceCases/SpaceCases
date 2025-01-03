@@ -12,7 +12,14 @@ from src.assets import (
     get_sticker_capsules,
 )
 from src.util.embed import send_err_embed
-from src.exceptions import InsufficientBalanceError, UserNotRegisteredError
+from src.exceptions import (
+    InsufficientBalanceError,
+    UserNotRegisteredError,
+    ItemDoesNotExistError,
+    ContainerDoesNotExistError,
+    UserDoesNotOwnItemError,
+    UserInventoryEmptyError,
+)
 from marisa_trie import Trie
 from spacecases_common import (
     ItemMetadatum,
@@ -70,6 +77,25 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
             await send_err_embed(
                 interaction, "You **do not** have sufficient balance for this action"
             )
+        elif isinstance(error, ItemDoesNotExistError):
+            await send_err_embed(interaction, f"Item `{error.item}` does **not** exist")
+        elif isinstance(error, ContainerDoesNotExistError):
+            await send_err_embed(
+                interaction, f"Container `{error.container}` does **not** exist"
+            )
+        elif isinstance(error, UserDoesNotOwnItemError):
+            item_metadatum = self.client.item_metadata[error.item]
+            if error.user.id == interaction.user.id:
+                message = f"You do not own a **{item_metadatum.formatted_name}**"
+            else:
+                message = f"{error.user.display_name} does not own a **{item_metadatum.formatted_name}**"
+            await send_err_embed(interaction, message)
+        elif isinstance(error, UserInventoryEmptyError):
+            if error.user.id == interaction.user.id:
+                message = "Your inventory is **empty**"
+            else:
+                message = f"{error.user.display_name}'s inventory is **empty**"
+            await send_err_embed(interaction, message)
         else:
             e = discord.Embed(
                 title="An error occurred!",

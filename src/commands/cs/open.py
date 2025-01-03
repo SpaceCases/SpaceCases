@@ -15,7 +15,11 @@ from src.database import (
 from src.util.embed import get_rarity_embed_color, send_err_embed
 from src.util.string import currency_str_format
 from src.util.constants import KEY_PRICE
-from src.exceptions import UserNotRegisteredError, InsufficientBalanceError
+from src.exceptions import (
+    UserNotRegisteredError,
+    InsufficientBalanceError,
+    ContainerDoesNotExistError,
+)
 from spacecases_common import (
     remove_skin_name_formatting,
     SkinContainerEntry,
@@ -164,8 +168,7 @@ async def open(
     try:
         container = bot.containers[container_unformatted_name]
     except KeyError:
-        await send_err_embed(interaction, f"Container `{name}` does **not** exist")
-        return
+        raise ContainerDoesNotExistError(name)
 
     price = container.price
     if container.requires_key:

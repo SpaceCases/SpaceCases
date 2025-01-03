@@ -1,16 +1,32 @@
 import discord
+from dataclasses import dataclass
 
 
-class SpaceCasesCommandError(discord.app_commands.AppCommandError):
-    """Base class for command-related errors."""
+@dataclass
+class UserNotRegisteredError(discord.app_commands.AppCommandError):
+    user: discord.Member | discord.User
 
+
+class InsufficientBalanceError(discord.app_commands.AppCommandError):
     pass
 
 
-class UserNotRegisteredError(SpaceCasesCommandError):
-    def __init__(self, user: discord.User | discord.Member):
-        self.user = user
+@dataclass
+class UserDoesNotOwnItemError(discord.app_commands.AppCommandError):
+    user: discord.Member | discord.User
+    item: str
 
 
-class InsufficientBalanceError(SpaceCasesCommandError):
-    pass
+@dataclass
+class ItemDoesNotExistError(discord.app_commands.AppCommandError):
+    item: str
+
+
+@dataclass
+class ContainerDoesNotExistError(discord.app_commands.AppCommandError):
+    container: str
+
+
+@dataclass
+class UserInventoryEmptyError(discord.app_commands.AppCommandError):
+    user: discord.Member | discord.User

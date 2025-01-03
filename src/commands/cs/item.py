@@ -3,7 +3,8 @@ import random
 from itertools import islice
 from src.bot import SpaceCasesBot
 from src.util.string import currency_str_format
-from src.util.embed import send_err_embed, get_rarity_embed_color
+from src.exceptions import ItemDoesNotExistError
+from src.util.embed import get_rarity_embed_color
 from spacecases_common import (
     remove_skin_name_formatting,
     SkinMetadatum,
@@ -18,8 +19,7 @@ async def item(bot: SpaceCasesBot, interaction: discord.Interaction, name: str) 
     try:
         item_metadata = bot.item_metadata[unformatted_name]
     except KeyError:
-        await send_err_embed(interaction, f"Item `{name}` does **not** exist")
-        return
+        raise ItemDoesNotExistError(name)
     # create the embed to send to the user
     item_metadata = bot.item_metadata[unformatted_name]
     e = discord.Embed(

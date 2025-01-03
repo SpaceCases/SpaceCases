@@ -1,11 +1,11 @@
 import discord
 from src.bot import SpaceCasesBot
 from src.database import DOES_USER_EXIST, CLOSE
+from src.exceptions import UserNotRegisteredError
 from src.util.embed import (
     yes_no_embed,
     create_success_embed,
     create_err_embed,
-    send_err_embed,
 )
 
 RESPONSE_TIME = 30
@@ -17,8 +17,7 @@ async def close(bot: SpaceCasesBot, interaction: discord.Interaction) -> None:
         await bot.db.fetch_from_file(DOES_USER_EXIST, interaction.user.id)
     )[0]["exists"]
     if not does_user_exist:
-        await send_err_embed(interaction, "You **don't** have an account delete")
-        return
+        raise UserNotRegisteredError(interaction.user)
 
     async def on_no(interaction: discord.Interaction) -> None:
         new_embed = create_err_embed("Account deletion **cancelled**")
