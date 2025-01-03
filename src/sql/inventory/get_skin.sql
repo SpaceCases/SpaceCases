@@ -3,13 +3,13 @@ WITH user_exists AS (
     SELECT EXISTS (SELECT 1 FROM "users" WHERE id = ($1) FOR UPDATE) AS user_exists
 ),
 skins AS (
-    SELECT name, float
+    SELECT float
     FROM skins
     WHERE owner_id = $1 AND name = $2
 )
 SELECT 
     (SELECT user_exists FROM user_exists) AS user_exists,
     ARRAY(
-        SELECT ROW(name, float)
+        SELECT float
         FROM skins
     ) AS skins

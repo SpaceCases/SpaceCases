@@ -1,60 +1,11 @@
 import discord
-from typing import Any, Coroutine, Optional, Callable
-from discord.ui import View
-from spacecases_common import Rarity
-
-
-def create_embed(
-    msg_content: str, color: discord.Color = discord.Color.dark_theme()
-) -> discord.Embed:
-    return discord.Embed(description=msg_content, color=color)
-
-
-def create_success_embed(msg_content: str) -> discord.Embed:
-    return create_embed(msg_content, discord.Color.green())
-
-
-def create_err_embed(msg_content: str) -> discord.Embed:
-    return create_embed(msg_content, discord.Color.red())
-
-
-async def send_embed(
-    interaction: discord.Interaction,
-    msg_content: str,
-    color: discord.Color = discord.Color.dark_theme(),
-    ephemeral: bool = False,
-) -> None:
-    embed = create_embed(msg_content, color)
-    await interaction.response.send_message(
-        embed=embed,
-        ephemeral=ephemeral,
-    )
-
-
-async def send_success_embed(
-    interaction: discord.Interaction, msg_content: str, ephemeral: bool = False
-) -> None:
-    embed = create_success_embed(msg_content)
-    await interaction.response.send_message(
-        embed=embed,
-        ephemeral=ephemeral,
-    )
-
-
-async def send_err_embed(
-    interaction: discord.Interaction, msg_content: str, ephemeral: bool = False
-) -> None:
-    embed = create_err_embed(msg_content)
-    await interaction.response.send_message(
-        embed=embed,
-        ephemeral=ephemeral,
-    )
-
+from typing import Callable, Coroutine, Optional, Any
+from .general import send_err_embed, create_err_embed
 
 type ButtonCallbackType = Callable[[discord.Interaction], Coroutine[Any, Any, None]]
 
 
-class YesNoEmbedView(View):
+class YesNoEmbedView(discord.ui.View):
     def __init__(
         self,
         on_yes: ButtonCallbackType,
@@ -107,9 +58,3 @@ async def yes_no_embed(
     await interaction.response.send_message(
         embed=embed, view=YesNoEmbedView(on_yes, on_no, interaction, timeout)
     )
-
-
-def get_rarity_embed_color(rarity: Rarity) -> int:
-    return [0xB0C3D9, 0x5E98D9, 0x4B69FF, 0x8847FF, 0xD32CE6, 0xEB4B4B, 0xE4AE39][
-        rarity.value
-    ]

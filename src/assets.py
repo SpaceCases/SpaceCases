@@ -35,9 +35,7 @@ SOUVENIR_PACKAGE_METADATA_PATH = os.path.join(
 def parse_metadata[T: BaseModel](url: str, model: type[T]) -> dict[str, T]:
     logger.info(f"Refreshing metadata from {url}...")
     raw_json = requests.get(url).json()
-    metadata = {
-        key: model.model_validate(value) for key, value in raw_json.items()
-    } 
+    metadata = {key: model.model_validate(value) for key, value in raw_json.items()}
     logger.info(f"Metadata refreshed from {url}")
     return metadata
 
