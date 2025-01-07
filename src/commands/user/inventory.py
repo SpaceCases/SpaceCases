@@ -2,7 +2,6 @@ import discord
 from src.bot import SpaceCasesBot
 from src.database import (
     GET_INVENTORY_CHECK_EXIST,
-    GET_INVENTORY,
     GET_SKIN,
     GET_STICKER,
 )
@@ -12,6 +11,7 @@ from src.util.embed import (
 )
 from src.util.string import currency_str_format
 from src.util.types import SkinOwnership, StickerOwnership
+from src.util.autocomplete import inventory_item_autocomplete
 from src.exceptions import (
     UserNotRegisteredError,
     UserInventoryEmptyError,
@@ -24,7 +24,6 @@ from spacecases_common import (
     StickerMetadatum,
 )
 from typing import Optional
-from collections import Counter
 
 
 async def inventory(
@@ -141,31 +140,4 @@ async def item_name_autocomplete(
     except KeyError:
         user = interaction.user
 
-    # get their items
-    unformatted_curret = remove_skin_name_formatting(current)
-    skins, stickers = (await bot.db.fetch_from_file(GET_INVENTORY, user.id))[0]
-    all_names: list[str] = [skin[0] for skin in skins] + [
-        sticker[0] for sticker in stickers
-    ]
-    name_counter = Counter(all_names)
-    # build the options
-    result = []
-    for name, count in name_counter.items():
-        if not name.startswith(unformatted_curret):
-            continue
-        item_metadatum = bot.item_metadata[name]
-        if count == 1:
-            result.append(
-                discord.app_commands.Choice(
-                    name=item_metadatum.formatted_name,
-                    value=item_metadatum.formatted_name,
-                )
-            )
-        else:
-            result.append(
-                discord.app_commands.Choice(
-                    name=f"{item_metadatum.formatted_name} X{count}",
-                    value=item_metadatum.formatted_name,
-                )
-            )
-    return result
+    return await inventory_item_autocomplete(bot, user, current)
