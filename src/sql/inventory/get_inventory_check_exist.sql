@@ -8,24 +8,15 @@ user_capacity AS (
     FROM "users"
     WHERE id = $1
 ),
-skins AS (
-    SELECT name, float
-    FROM skins
-    WHERE owner_id = $1
-),
-stickers AS (
-    SELECT name
-    FROM stickers
+items AS (
+    SELECT id, type, name, details
+    FROM items
     WHERE owner_id = $1
 )
 SELECT 
     (SELECT user_exists FROM user_exists) AS user_exists,
     (SELECT inventory_capacity FROM user_capacity) AS inventory_capacity,
     ARRAY(
-        SELECT ROW(name, float)
-        FROM skins
-    ) AS skins,
-    ARRAY(
-        SELECT ROW(name)
-        FROM stickers
-    ) AS stickers;
+        SELECT ROW(id, type, name, details)
+        FROM items
+    ) AS items;

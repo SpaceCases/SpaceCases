@@ -1,14 +1,13 @@
+import json
 import discord
 import random
 from typing import Optional
 from itertools import islice
 from src.bot import SpaceCasesBot
 from src.database import (
-    ADD_SKIN,
-    ADD_STICKER,
+    ADD_ITEM,
     DOES_USER_EXIST_FOR_UPDATE,
-    LOCK_SKINS,
-    LOCK_STICKERS,
+    LOCK_ITEMS,
     CHANGE_BALANCE,
     TRY_DEDUCT_BALANCE,
 )
@@ -64,11 +63,19 @@ class OpenView(discord.ui.View):
 
         # add the item to our inventory
         if isinstance(self.item, SkinMetadatum):
-            query = ADD_SKIN
-            args = [self.interaction.user.id, self.item_unformatted_name, self.float]
+            args = [
+                self.interaction.user.id,
+                "skin",
+                self.item_unformatted_name,
+                json.dumps({"float": self.float}),
+            ]
         elif isinstance(self.item, StickerMetadatum):
-            query = ADD_STICKER
-            args = [self.interaction.user.id, self.item_unformatted_name]
+            args = [
+                self.interaction.user.id,
+                "sticker",
+                self.item_unformatted_name,
+                json.dumps({}),
+            ]
 
         async with self.bot.db.pool.acquire() as connection:
             async with connection.transaction():
@@ -81,17 +88,13 @@ class OpenView(discord.ui.View):
                 if not rows[0]["exists"]:
                     raise UserNotRegisteredError(interaction.user)
 
-                # lock the skins and stickers tables
+                # lock the items
                 await self.bot.db.execute_from_file_with_connection(
-                    LOCK_SKINS, connection
+                    LOCK_ITEMS, connection
                 )
-                await self.bot.db.execute_from_file_with_connection(
-                    LOCK_STICKERS, connection
-                )
-
                 # add item
                 rows = await self.bot.db.fetch_from_file_with_connection(
-                    query,
+                    ADD_ITEM,
                     connection,
                     *args,
                 )

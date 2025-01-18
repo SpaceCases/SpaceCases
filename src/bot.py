@@ -84,11 +84,10 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
                 interaction, f"Container `{error.container}` does **not** exist"
             )
         elif isinstance(error, UserDoesNotOwnItemError):
-            item_metadatum = self.client.item_metadata[error.item]
             if error.user.id == interaction.user.id:
-                message = f"You do not own a **{item_metadatum.formatted_name}**"
+                message = f"You do not own an item with ID: `{error.id}`"
             else:
-                message = f"{error.user.display_name} does not own a **{item_metadatum.formatted_name}**"
+                message = f"{error.user.display_name} does not own an item with ID: `{error.id}`"
             await send_err_embed(interaction, message)
         elif isinstance(error, UserInventoryEmptyError):
             if error.user.id == interaction.user.id:
@@ -103,7 +102,7 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
                 color=discord.Color.red(),
             )
             await interaction.response.send_message(embed=e, ephemeral=True)
-            raise
+            logger.exception(error)
 
 
 class SpaceCasesBot(commands.Bot):

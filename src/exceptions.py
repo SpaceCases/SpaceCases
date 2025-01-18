@@ -14,7 +14,7 @@ class InsufficientBalanceError(discord.app_commands.AppCommandError):
 @dataclass
 class UserDoesNotOwnItemError(discord.app_commands.AppCommandError):
     user: discord.Member | discord.User
-    item: str
+    id: int
 
 
 @dataclass

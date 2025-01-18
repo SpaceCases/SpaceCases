@@ -1,46 +1,35 @@
+import json
 import discord
 from src.bot import SpaceCasesBot
-from src.database import (
-    GET_INVENTORY_CHECK_EXIST,
-    GET_SKIN,
-    GET_STICKER,
-)
-from src.util.embed import (
-    send_skin_viewer,
-    send_sticker_viewer,
-)
+from src.database import GET_INVENTORY_CHECK_EXIST, GET_ITEM
 from src.util.string import currency_str_format
-from src.util.types import SkinOwnership, StickerOwnership
 from src.util.autocomplete import inventory_item_autocomplete
+from src.util.types import ItemType
+from src.util.embed import get_rarity_embed_color
 from src.exceptions import (
     UserNotRegisteredError,
     UserInventoryEmptyError,
-    ItemDoesNotExistError,
     UserDoesNotOwnItemError,
 )
-from spacecases_common import (
-    remove_skin_name_formatting,
-    SkinMetadatum,
-    StickerMetadatum,
-)
-from typing import Optional
+from spacecases_common import SkinMetadatum
+from typing import Optional, cast
 
 
 async def inventory(
     bot: SpaceCasesBot,
     interaction: discord.Interaction,
     user: Optional[discord.User],
-    item: Optional[str],
+    item_id: Optional[int],
 ) -> None:
     if user is None:
         target_user = interaction.user
     else:
         target_user = user
 
-    if item is None:
+    if item_id is None:
         await show_user_inventory(interaction, bot, target_user)
     else:
-        await show_item_from_user_inventory(interaction, bot, target_user, item)
+        await show_item_from_user_inventory(interaction, bot, target_user, item_id)
 
 
 async def show_user_inventory(
@@ -48,42 +37,29 @@ async def show_user_inventory(
     bot: SpaceCasesBot,
     user: discord.Member | discord.User,
 ) -> None:
-    user_exists, inventory_capacity, skins, stickers = (
+    user_exists, inventory_capacity, items = (
         await bot.db.fetch_from_file(GET_INVENTORY_CHECK_EXIST, user.id)
     )[0]
     if not user_exists:
         raise UserNotRegisteredError(user)
 
     # empty inventory
-    if len(skins) == 0 and len(stickers) == 0:
+    if len(items) == 0:
         raise UserInventoryEmptyError(user)
 
     # create embed
-    inventory_value = sum(bot.item_metadata[skin[0]].price for skin in skins) + sum(
-        bot.item_metadata[sticker[0]].price for sticker in stickers
-    )
+    inventory_value = sum(bot.item_metadata[item[2]].price for item in items)
     e = discord.Embed(
         title=f"{user.display_name}'s Inventory",
-        description=f"Total Value: **{currency_str_format(inventory_value)}**\nSlots Used: **{len(skins) + len(stickers)}/{inventory_capacity}**",
+        description=f"Total Value: **{currency_str_format(inventory_value)}**\nSlots Used: **{len(items)}/{inventory_capacity}**",
     )
-    # skins field
-    if len(skins) > 0:
-        skin_details = []
-        for skin in skins:
-            metadata = bot.item_metadata[skin[0]]
-            skin_details.append(
-                f"{metadata.formatted_name} - **{currency_str_format(metadata.price)}**"
-            )
-        e.add_field(name="Skins", value="\n".join(skin_details), inline=False)
-    # stickers field
-    if len(stickers):
-        sticker_details = []
-        for sticker in stickers:
-            metadata = bot.item_metadata[sticker[0]]
-            sticker_details.append(
-                f"{metadata.formatted_name} - **{currency_str_format(metadata.price)}**"
-            )
-        e.add_field(name="Stickers", value="\n".join(sticker_details))
+    item_strings = []
+    for id, _, name, _ in items:
+        metadata = bot.item_metadata[name]
+        item_strings.append(
+            f"{metadata.formatted_name} - **{currency_str_format(metadata.price)}** (ID: **{id}**)"
+        )
+    e.add_field(name="Items", value="\n".join(item_strings))
     e.set_thumbnail(url=user.display_avatar.url)
     await interaction.response.send_message(embed=e)
 
@@ -92,46 +68,38 @@ async def show_item_from_user_inventory(
     interaction: discord.Interaction,
     bot: SpaceCasesBot,
     user: discord.Member | discord.User,
-    item: str,
+    item_id: int,
 ) -> None:
-    # check item exists
-    unformatted_item_name = remove_skin_name_formatting(item)
-    try:
-        item_metadatum = bot.item_metadata[unformatted_item_name]
-    except KeyError:
-        raise ItemDoesNotExistError(item)
-
-    # send embed
-    if isinstance(item_metadatum, SkinMetadatum):
-        # get the skin(s)
-        exists, floats = (
-            await bot.db.fetch_from_file(GET_SKIN, user.id, unformatted_item_name)
-        )[0]
-        if not exists:
-            raise UserNotRegisteredError(user)
-        # user does not own this item
-        if len(floats) == 0:
-            raise UserDoesNotOwnItemError(user, item)
-        # send skin viewer embed
-        await send_skin_viewer(interaction, SkinOwnership(user, item_metadatum, floats))
-
-    elif isinstance(item_metadatum, StickerMetadatum):
-        # get the sticker
-        exists, count = (
-            await bot.db.fetch_from_file(GET_STICKER, user.id, unformatted_item_name)
-        )[0]
-        if not exists:
-            raise UserNotRegisteredError(user)
-        # user does not own this item
-        if count == 0:
-            raise UserDoesNotOwnItemError(user, item)
-        # send sticker embed
-        await send_sticker_viewer(
-            interaction, StickerOwnership(user, item_metadatum, count)
-        )
+    rows = await bot.db.fetch_from_file(GET_ITEM, user.id, item_id)
+    if len(rows) == 0:
+        raise UserDoesNotOwnItemError(user, item_id)
+    user_exists: bool
+    name: str
+    type: ItemType
+    user_exists, name, type, details = rows[0]
+    details = json.loads(details)
+    if not user_exists:
+        raise UserNotRegisteredError(user)
+    metadatum = bot.item_metadata[name]
+    e = discord.Embed(
+        title=metadatum.formatted_name, color=get_rarity_embed_color(metadatum.rarity)
+    )
+    e.add_field(name="Price", value=currency_str_format(metadatum.price))
+    e.set_image(url=metadatum.image_url)
+    e.set_footer(text=f"Owned by {user.display_name}", icon_url=user.display_avatar)
+    if type == ItemType.Skin:
+        metadatum = cast(SkinMetadatum, metadatum)
+        e.description = metadatum.description
+        float_val: float = details["float"]
+        e.add_field(name="Float", value=float_val)
+        rarity = metadatum.rarity.get_name_for_skin()
+    elif type == ItemType.Sticker:
+        rarity = metadatum.rarity.get_name_for_skin()
+    e.add_field(name="Rarity", value=rarity)
+    await interaction.response.send_message(embed=e)
 
 
-async def item_name_autocomplete(
+async def item_id_autocomplete(
     bot: SpaceCasesBot, interaction: discord.Interaction, current: str
 ) -> list[discord.app_commands.Choice]:
     # what user are they trying to view the inventory of?

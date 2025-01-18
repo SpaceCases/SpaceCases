@@ -6,7 +6,7 @@ from src.commands.user.register import register
 from src.commands.user.balance import balance
 from src.commands.user.transfer import transfer
 from src.commands.user.claim import claim
-from src.commands.user.inventory import inventory, item_name_autocomplete
+from src.commands.user.inventory import inventory, item_id_autocomplete
 from typing import Optional
 
 
@@ -58,21 +58,21 @@ class User(commands.Cog):
     )
     @discord.app_commands.describe(
         user="The user whose inventory you want to view.",
-        item="The specific item to inspect in the user's inventory.",
+        item_id="The id of the specific item to inspect in the user's inventory.",
     )
     async def inventory(
         self,
         interaction: discord.Interaction,
         user: Optional[discord.User],
-        item: Optional[str],
+        item_id: Optional[int],
     ) -> None:
-        await inventory(self.bot, interaction, user, item)
+        await inventory(self.bot, interaction, user, item_id)
 
-    @inventory.autocomplete("item")
-    async def item_autocomplete(
+    @inventory.autocomplete("item_id")
+    async def item_id_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[discord.app_commands.Choice]:
-        return await item_name_autocomplete(self.bot, interaction, current)
+        return await item_id_autocomplete(self.bot, interaction, current)
 
 
 async def setup(bot: SpaceCasesBot) -> None:

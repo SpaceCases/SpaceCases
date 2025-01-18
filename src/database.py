@@ -4,6 +4,7 @@ from src.logger import logger
 from typing import Any, Self
 from asyncpg import Record
 from asyncpg.pool import PoolConnectionProxy
+from src.util.types import ItemType
 
 # root folder for sql queries
 SQL_QUERIES_DIRECTORY = os.path.join("src", "sql")
@@ -19,14 +20,17 @@ CLOSE = "user/close.sql"
 COUNT_USERS = "user/count_users.sql"
 DOES_USER_EXIST_FOR_UPDATE = "user/does_user_exist_for_update.sql"
 DOES_USER_EXIST = "user/does_user_exist.sql"
-ADD_SKIN = "inventory/add_skin.sql"
-ADD_STICKER = "inventory/add_sticker.sql"
-LOCK_SKINS = "inventory/lock_skins.sql"
-LOCK_STICKERS = "inventory/lock_stickers.sql"
+ADD_ITEM = "inventory/add_item.sql"
+LOCK_ITEMS = "inventory/lock_items.sql"
 GET_INVENTORY_CHECK_EXIST = "inventory/get_inventory_check_exist.sql"
 GET_INVENTORY = "inventory/get_inventory.sql"
-GET_SKIN = "inventory/get_skin.sql"
-GET_STICKER = "inventory/get_sticker.sql"
+GET_ITEM = "inventory/get_item.sql"
+
+
+async def register_type_codecs(conn: asyncpg.Connection) -> None:
+    await conn.set_type_codec(
+        "item_type", schema="public", encoder=str, decoder=ItemType, format="text"
+    )
 
 
 class Database:
@@ -35,7 +39,12 @@ class Database:
         self, user: str, password: str, database: str, host: str, port: str
     ) -> "Database":
         pool = await asyncpg.create_pool(
-            user=user, password=password, database=database, host=host, port=port
+            user=user,
+            password=password,
+            database=database,
+            host=host,
+            port=port,
+            init=register_type_codecs,
         )
 
         if pool is None:

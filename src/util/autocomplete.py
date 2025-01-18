@@ -1,8 +1,9 @@
+import json
 import discord
-from collections import Counter
 from spacecases_common import remove_skin_name_formatting
 from src.bot import SpaceCasesBot
 from src.database import GET_INVENTORY
+from src.util.types import ItemType
 
 
 async def inventory_item_autocomplete(
@@ -10,29 +11,23 @@ async def inventory_item_autocomplete(
 ) -> list[discord.app_commands.Choice]:
     # get their items
     unformatted_curret = remove_skin_name_formatting(current)
-    skins, stickers = (await bot.db.fetch_from_file(GET_INVENTORY, user.id))[0]
-    all_names: list[str] = [skin[0] for skin in skins] + [
-        sticker[0] for sticker in stickers
-    ]
-    name_counter = Counter(all_names)
-    # build the options
+    items = await bot.db.fetch_from_file(GET_INVENTORY, user.id)
     result = []
-    for name, count in name_counter.items():
+    name: str
+    type: ItemType
+    for id, name, type, details in items:
+        details = json.loads(details)
         if not name.startswith(unformatted_curret):
             continue
         item_metadatum = bot.item_metadata[name]
-        if count == 1:
-            result.append(
-                discord.app_commands.Choice(
-                    name=item_metadatum.formatted_name,
-                    value=item_metadatum.formatted_name,
-                )
+        if type == ItemType.Skin:
+            name = f"{item_metadatum.formatted_name} - {details["float"]} (ID: {id})"
+        elif type == ItemType.Sticker:
+            name = f"{item_metadatum.formatted_name} (ID: {id})"
+        result.append(
+            discord.app_commands.Choice(
+                name=name,
+                value=str(id),
             )
-        else:
-            result.append(
-                discord.app_commands.Choice(
-                    name=f"{item_metadatum.formatted_name} X{count}",
-                    value=item_metadatum.formatted_name,
-                )
-            )
+        )
     return result

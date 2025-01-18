@@ -6,24 +6,15 @@ CREATE TABLE users (
     inventory_capacity BIGINT NOT NULL
 );
 
-CREATE TABLE skins (
+CREATE TYPE item_type AS ENUM ('skin', 'sticker');
+
+CREATE TABLE items (
     id BIGSERIAL PRIMARY KEY,
     owner_id BIGINT NOT NULL,
+    type item_type NOT NULL,
     name TEXT NOT NULL,
-    float FLOAT NOT NULL,
+    details JSONB NOT NULL,
     FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_skins_owner_id ON skins (owner_id);
-CREATE INDEX idx_skins_owner_id_name ON skins (owner_id, name);
-
-CREATE TABLE stickers (
-    id BIGSERIAL PRIMARY KEY,
-    owner_id BIGINT NOT NULL,
-    name TEXT NOT NULL,
-    FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
-);
-
-CREATE INDEX idx_stickers_owner_id ON stickers (owner_id);
-CREATE INDEX idx_stickers_owner_id_name ON stickers (owner_id, name)
-
+CREATE INDEX idx_items_owner_id ON items (owner_id);
