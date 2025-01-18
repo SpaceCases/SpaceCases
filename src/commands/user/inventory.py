@@ -12,7 +12,7 @@ from src.exceptions import (
     UserDoesNotOwnItemError,
 )
 from spacecases_common import SkinMetadatum
-from typing import Optional, cast
+from typing import Optional, cast, Any
 
 
 async def inventory(
@@ -70,13 +70,14 @@ async def show_item_from_user_inventory(
     user: discord.Member | discord.User,
     item_id: int,
 ) -> None:
-    rows = await bot.db.fetch_from_file(GET_ITEM, user.id, item_id)
-    if len(rows) == 0:
-        raise UserDoesNotOwnItemError(user, item_id)
     user_exists: bool
-    name: str
-    type: ItemType
-    user_exists, name, type, details = rows[0]
+    item: Optional[tuple[str, ItemType, Any]]
+    user_exists, item = (await bot.db.fetch_from_file(GET_ITEM, user.id, item_id))[0]
+    if not user_exists:
+        raise UserNotRegisteredError(user)
+    if item is None:
+        raise UserDoesNotOwnItemError(user, item_id)
+    name, type, details = item
     details = json.loads(details)
     if not user_exists:
         raise UserNotRegisteredError(user)
