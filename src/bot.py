@@ -11,15 +11,7 @@ from src.assets import (
     get_souvenir_packages,
     get_sticker_capsules,
 )
-from src.util.embed import send_err_embed
-from src.exceptions import (
-    InsufficientBalanceError,
-    UserNotRegisteredError,
-    ItemDoesNotExistError,
-    ContainerDoesNotExistError,
-    UserDoesNotOwnItemError,
-    UserInventoryEmptyError,
-)
+from src.ui.embed import send_exception_embed
 from marisa_trie import Trie
 from spacecases_common import (
     ItemMetadatum,
@@ -67,42 +59,7 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
     async def on_error(
         self, interaction: discord.Interaction, error: app_commands.AppCommandError
     ) -> None:
-        if isinstance(error, UserNotRegisteredError):
-            if interaction.user.id == error.user.id:
-                message = f"You are **not** registered. Use {self.client.get_slash_command_mention_string('register')} to register!"
-            else:
-                message = f"{error.user.display_name} is **not** registered"
-            await send_err_embed(interaction, message)
-        elif isinstance(error, InsufficientBalanceError):
-            await send_err_embed(
-                interaction, "You **do not** have sufficient balance for this action"
-            )
-        elif isinstance(error, ItemDoesNotExistError):
-            await send_err_embed(interaction, f"Item `{error.item}` does **not** exist")
-        elif isinstance(error, ContainerDoesNotExistError):
-            await send_err_embed(
-                interaction, f"Container `{error.container}` does **not** exist"
-            )
-        elif isinstance(error, UserDoesNotOwnItemError):
-            if error.user.id == interaction.user.id:
-                message = f"You do not own an item with ID: `{error.id}`"
-            else:
-                message = f"{error.user.display_name} does not own an item with ID: `{error.id}`"
-            await send_err_embed(interaction, message)
-        elif isinstance(error, UserInventoryEmptyError):
-            if error.user.id == interaction.user.id:
-                message = "Your inventory is **empty**"
-            else:
-                message = f"{error.user.display_name}'s inventory is **empty**"
-            await send_err_embed(interaction, message)
-        else:
-            e = discord.Embed(
-                title="An error occurred!",
-                description="It has been reported automatically",
-                color=discord.Color.red(),
-            )
-            await interaction.response.send_message(embed=e, ephemeral=True)
-            logger.exception(error)
+        await send_exception_embed(interaction, error)
 
 
 class SpaceCasesBot(commands.Bot):
@@ -148,7 +105,7 @@ class SpaceCasesBot(commands.Bot):
         )
         self.container_trie = Trie(self.container_unformatted_names)
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(hours=4)
     async def refresh_data_loop(self) -> None:
         self.refresh_item_metadata()
         self.refresh_containers()

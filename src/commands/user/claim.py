@@ -1,8 +1,8 @@
 import discord
 from src.bot import SpaceCasesBot
 from src.database import CLAIM
-from src.util.embed import send_err_embed
-from src.util.string import currency_str_format
+from src.ui.embed import send_err_embed
+from src.string import currency_str_format
 from src.exceptions import UserNotRegisteredError
 
 

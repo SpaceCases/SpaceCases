@@ -4,7 +4,7 @@ from src.logger import logger
 from typing import Any, Self
 from asyncpg import Record
 from asyncpg.pool import PoolConnectionProxy
-from src.util.types import ItemType
+from .types import ItemType
 
 # root folder for sql queries
 SQL_QUERIES_DIRECTORY = os.path.join("src", "sql")
@@ -25,6 +25,7 @@ LOCK_ITEMS = "inventory/lock_items.sql"
 GET_INVENTORY_CHECK_EXIST = "inventory/get_inventory_check_exist.sql"
 GET_INVENTORY = "inventory/get_inventory.sql"
 GET_ITEM = "inventory/get_item.sql"
+REMOVE_ITEM = "inventory/remove_item.sql"
 
 
 async def register_type_codecs(conn: asyncpg.Connection) -> None:

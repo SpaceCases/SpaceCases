@@ -1,11 +1,12 @@
 import discord
 from typing import Callable, Coroutine, Optional, Any
-from .general import send_err_embed, create_err_embed
+from . import send_err_embed, create_err_embed
+from .. import SpaceCasesView
 
 type ButtonCallbackType = Callable[[discord.Interaction], Coroutine[Any, Any, None]]
 
 
-class YesNoEmbedView(discord.ui.View):
+class YesNoEmbedView(SpaceCasesView):
     def __init__(
         self,
         on_yes: ButtonCallbackType,

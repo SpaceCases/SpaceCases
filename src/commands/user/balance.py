@@ -1,7 +1,7 @@
 import discord
 from src.bot import SpaceCasesBot
 from src.database import BALANCE
-from src.util.string import currency_str_format
+from src.string import currency_str_format
 from typing import Optional
 from src.exceptions import UserNotRegisteredError
 

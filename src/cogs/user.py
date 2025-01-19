@@ -6,7 +6,7 @@ from src.commands.user.register import register
 from src.commands.user.balance import balance
 from src.commands.user.transfer import transfer
 from src.commands.user.claim import claim
-from src.commands.user.inventory import inventory, item_id_autocomplete
+from src.commands.user import inventory, sell
 from typing import Optional
 
 
@@ -66,13 +66,29 @@ class User(commands.Cog):
         user: Optional[discord.User],
         item_id: Optional[int],
     ) -> None:
-        await inventory(self.bot, interaction, user, item_id)
+        await inventory.inventory(self.bot, interaction, user, item_id)
 
     @inventory.autocomplete("item_id")
-    async def item_id_autocomplete(
+    async def inventory_item_id_autocomplete(
         self, interaction: discord.Interaction, current: str
     ) -> list[discord.app_commands.Choice]:
-        return await item_id_autocomplete(self.bot, interaction, current)
+        return await inventory.item_id_autocomplete(self.bot, interaction, current)
+
+    @discord.app_commands.command(
+        name="sell",
+        description="Sell an item from your inventory.",
+    )
+    @discord.app_commands.describe(
+        item_id="The id of the item you want to sell.",
+    )
+    async def sell(self, interaction: discord.Interaction, item_id: int) -> None:
+        await sell.sell(self.bot, interaction, item_id)
+
+    @sell.autocomplete("item_id")
+    async def sell_item_id_autocomplete(
+        self, interaction: discord.Interaction, current: str
+    ) -> list[discord.app_commands.Choice]:
+        return await sell.item_id_autocomplete(self.bot, interaction, current)
 
 
 async def setup(bot: SpaceCasesBot) -> None:

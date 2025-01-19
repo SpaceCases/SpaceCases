@@ -2,10 +2,10 @@ import json
 import discord
 from src.bot import SpaceCasesBot
 from src.database import GET_INVENTORY_CHECK_EXIST, GET_ITEM
-from src.util.string import currency_str_format
-from src.util.autocomplete import inventory_item_autocomplete
-from src.util.types import ItemType
-from src.util.embed import get_rarity_embed_color
+from src.string import currency_str_format
+from src.autocomplete import inventory_item_autocomplete
+from src.types import ItemType
+from src.ui.embed import get_rarity_embed_color
 from src.exceptions import (
     UserNotRegisteredError,
     UserInventoryEmptyError,
@@ -79,8 +79,6 @@ async def show_item_from_user_inventory(
         raise UserDoesNotOwnItemError(user, item_id)
     name, type, details = item
     details = json.loads(details)
-    if not user_exists:
-        raise UserNotRegisteredError(user)
     metadatum = bot.item_metadata[name]
     e = discord.Embed(
         title=metadatum.formatted_name, color=get_rarity_embed_color(metadatum.rarity)

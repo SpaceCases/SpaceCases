@@ -2,9 +2,10 @@ import discord
 from itertools import batched, groupby
 from typing import Optional
 from src.bot import SpaceCasesBot
-from src.util.string import currency_str_format
-from src.util.constants import KEY_PRICE
-from src.util.embed import send_err_embed
+from src.string import currency_str_format
+from src.constants import KEY_PRICE
+from src.ui.embed import send_err_embed
+from src.ui import SpaceCasesView
 from dataclasses import dataclass
 from spacecases_common import Container, SkinCase, SouvenirPackage, StickerCapsule
 
@@ -73,7 +74,7 @@ def get_pages(
     return pages
 
 
-class ContainersView(discord.ui.View):
+class ContainersView(SpaceCasesView):
     def __init__(self, owner_id: int, pages: list[Page]):
         super().__init__(timeout=None)
         self.owner_id = owner_id

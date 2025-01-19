@@ -2,7 +2,7 @@ import discord
 from src.bot import SpaceCasesBot
 from src.database import DOES_USER_EXIST, CLOSE
 from src.exceptions import UserNotRegisteredError
-from src.util.embed import (
+from src.ui.embed import (
     yes_no_embed,
     create_success_embed,
     create_err_embed,

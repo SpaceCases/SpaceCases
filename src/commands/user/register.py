@@ -1,7 +1,7 @@
 import discord
 from src.bot import SpaceCasesBot
 from src.database import REGISTER
-from src.util.embed import send_success_embed, send_err_embed
+from src.ui.embed import send_success_embed, send_err_embed
 
 
 async def register(bot: SpaceCasesBot, interaction: discord.Interaction) -> None:

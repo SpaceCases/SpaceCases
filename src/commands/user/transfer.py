@@ -2,8 +2,8 @@ import discord
 import re
 from src.bot import SpaceCasesBot
 from src.database import BALANCE_FOR_UPDATE, CHANGE_BALANCE
-from src.util.embed import send_err_embed
-from src.util.string import currency_str_format
+from src.ui.embed import send_err_embed
+from src.string import currency_str_format
 from decimal import Decimal
 from src.exceptions import UserNotRegisteredError, InsufficientBalanceError
 

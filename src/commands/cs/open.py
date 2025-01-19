@@ -11,9 +11,10 @@ from src.database import (
     CHANGE_BALANCE,
     TRY_DEDUCT_BALANCE,
 )
-from src.util.embed import get_rarity_embed_color, send_err_embed
-from src.util.string import currency_str_format
-from src.util.constants import KEY_PRICE
+from src.ui.embed import get_rarity_embed_color, send_err_embed
+from src.ui import SpaceCasesView
+from src.string import currency_str_format
+from src.constants import KEY_PRICE
 from src.exceptions import (
     UserNotRegisteredError,
     InsufficientBalanceError,
@@ -33,7 +34,7 @@ from spacecases_common import (
 )
 
 
-class OpenView(discord.ui.View):
+class OpenView(SpaceCasesView):
     def __init__(
         self,
         interaction: discord.Interaction,

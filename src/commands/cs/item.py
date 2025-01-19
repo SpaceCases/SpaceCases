@@ -2,9 +2,9 @@ import discord
 import random
 from itertools import islice
 from src.bot import SpaceCasesBot
-from src.util.string import currency_str_format
+from src.string import currency_str_format
 from src.exceptions import ItemDoesNotExistError
-from src.util.embed import get_rarity_embed_color
+from src.ui.embed import get_rarity_embed_color
 from spacecases_common import (
     remove_skin_name_formatting,
     SkinMetadatum,
