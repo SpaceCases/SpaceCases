@@ -7,12 +7,12 @@ SpaceCases is a Discord bot for trading, unboxing, and collecting virtual CS2 sk
 Before running the bot, ensure that you have the following:
 
 - **Python 3.12+** installed on your machine.
-- **PostgreSQL** with a database and an associated superuser.
+- **PostgreSQL** with a database and an associated superuser account.
 - A **Discord bot user** setup with the necessary permissions:
   - **Create a Bot User**: Follow [this guide](https://discordpy.readthedocs.io/en/stable/discord.html) to create a Discord bot and obtain its token.
   - **Intents**: The bot uses the following privileged intents:
       - `Message Content`
-  - **Generatiing the Bot Invite Link**:
+  - **Generating the Bot Invite Link**:
       - Use the following [scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes) when generating the invite link for the bot:
         - `bot`
         - `applications.commands`
@@ -32,8 +32,20 @@ python -m pip install .                                     # Install dependenci
 mv .env.example .env                                        # Rename .env.example to .env
 psql -U user -h host -d database_name -f src/sql/init.sql   # Run init.sql file to setup database
 ```
-Then use your preferred text editor of choice to edit the environment variables in `.env`. Once that is setup, you can run the bot:
+Then use your preferred text editor to edit the environment variables in `.env`. Once that is setup, you can run the bot:
 ```bash
 python main.py                                     # Run the bot
 ```
 
+## Commands
+
+`/register` - Create a SpaceCases bank account    
+`/close` - Close your SpaceCases bank account    
+`/balance` - View a user's bank account balance    
+`/claim` - Claim your daily allowance    
+`/transfer` - Transfer balance to another user    
+`/inventory` - View a user's inventory or inspect a specific item from it    
+`/sell` - Sell an item from your inventory    
+`/open` - Open a container    
+`/item` - View an item's information    
+`/containers` - View a list of all openable containers    
