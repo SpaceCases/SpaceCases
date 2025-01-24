@@ -1,6 +1,6 @@
 # SpaceCases
 
-SpaceCases is a Discord bot for trading, unboxing, and collecting virtual CS2 skins and items. 
+SpaceCases is a Discord bot for trading, unboxing, and collecting virtual CS2 skins and items. Click [here](https://discord.com/oauth2/authorize?client_id=1310243158478815253&permissions=2048&integration_type=0&scope=bot+applications.commands) to invite it to your server.
 
 ## Prerequisites
 
