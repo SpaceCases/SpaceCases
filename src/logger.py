@@ -1,7 +1,10 @@
+import discord
 import logging
 
 
 def _init_logging() -> logging.Logger:
+    discord.utils.setup_logging(root=False)
+
     # Create logger
     logger = logging.getLogger("SpaceCases")
     logger.setLevel(logging.DEBUG)
@@ -14,11 +17,6 @@ def _init_logging() -> logging.Logger:
     console_handler.setLevel(logging.DEBUG)
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
-
-    # Add handlers to discord logger too
-    discord_logger = logging.getLogger("discord")
-    discord_logger.setLevel(logging.INFO)
-    discord_logger.addHandler(console_handler)
 
     logger.info("Logger initialised")
     return logger
