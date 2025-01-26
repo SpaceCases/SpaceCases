@@ -13,7 +13,7 @@ async def main() -> None:
         environment.db_host,
         environment.db_port,
     ) as db:
-        bot = SpaceCasesBot(db, environment.test_guild)
+        bot = SpaceCasesBot(db, environment.test_guild, environment.owner_id)
         try:
             await bot.start(environment.bot_token)
         finally:

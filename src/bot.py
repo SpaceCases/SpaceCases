@@ -63,7 +63,7 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
 
 
 class SpaceCasesBot(commands.Bot):
-    def __init__(self, pool: Database, test_guild: Optional[str]):
+    def __init__(self, pool: Database, test_guild: Optional[str], owner_id: int):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(
@@ -83,6 +83,7 @@ class SpaceCasesBot(commands.Bot):
         self.status_int = 0
         self.user_count = 0
         self.test_guild = test_guild
+        self.owner_id = owner_id
 
     def refresh_item_metadata(self) -> None:
         skin_metadata = get_skin_metadata()
@@ -132,6 +133,11 @@ class SpaceCasesBot(commands.Bot):
     async def setup_hook(self) -> None:
         self.user_count = (await self.db.fetch_from_file(COUNT_USERS))[0]["count"]
         await self._load_cogs()
+        for command in await self.tree.fetch_commands():
+            self.command_ids[command.name] = command.id
+        self.refresh_data_loop.start()
+
+    async def sync_commands(self) -> None:
         if self.test_guild is not None:
             guild = discord.Object(id=self.test_guild)
             logger.info(f"Syncing commands for guild with id: {self.test_guild}...")
@@ -146,9 +152,6 @@ class SpaceCasesBot(commands.Bot):
             logger.info(
                 f"Successfully synced the following commands globally: {synced}"
             )
-        for command in synced:
-            self.command_ids[command.name] = command.id
-        self.refresh_data_loop.start()
 
     async def on_ready(self) -> None:
         self.bot_status_loop.start()
