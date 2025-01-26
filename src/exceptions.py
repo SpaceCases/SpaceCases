@@ -7,6 +7,7 @@ class UserNotRegisteredError(discord.app_commands.AppCommandError):
     user: discord.Member | discord.User
 
 
+@dataclass
 class InsufficientBalanceError(discord.app_commands.AppCommandError):
     pass
 
