@@ -2,11 +2,11 @@ import json
 import discord
 from src.bot import SpaceCasesBot
 from src.autocomplete import inventory_item_autocomplete
-from src.types import ItemType
 from src.ui.embed import yes_no_embed, create_err_embed
 from src.string import currency_str_format
 from src.exceptions import UserDoesNotOwnItemError, UserNotRegisteredError
 from src.database import GET_ITEM, REMOVE_ITEM, CHANGE_BALANCE
+from spacecases_common import ItemType
 from typing import Optional, Any
 
 

@@ -1,9 +1,8 @@
 import json
 import discord
-from spacecases_common import remove_skin_name_formatting
+from spacecases_common import remove_skin_name_formatting, ItemType
 from src.bot import SpaceCasesBot
 from src.database import GET_INVENTORY
-from src.types import ItemType
 
 
 async def inventory_item_autocomplete(

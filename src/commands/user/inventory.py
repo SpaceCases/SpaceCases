@@ -4,14 +4,13 @@ from src.bot import SpaceCasesBot
 from src.database import GET_INVENTORY_CHECK_EXIST, GET_ITEM
 from src.string import currency_str_format
 from src.autocomplete import inventory_item_autocomplete
-from src.types import ItemType
 from src.ui.embed import get_rarity_embed_color
 from src.exceptions import (
     UserNotRegisteredError,
     UserInventoryEmptyError,
     UserDoesNotOwnItemError,
 )
-from spacecases_common import SkinMetadatum
+from spacecases_common import SkinMetadatum, ItemType
 from typing import Optional, cast, Any
 
 

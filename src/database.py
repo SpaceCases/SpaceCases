@@ -4,7 +4,7 @@ import asyncpg
 from typing import Any, Self
 from asyncpg import Record
 from asyncpg.pool import PoolConnectionProxy
-from .types import ItemType
+from spacecases_common import ItemType
 
 logger = get_logger(__name__)
 
