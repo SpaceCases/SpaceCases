@@ -32,11 +32,14 @@ python -m pip install .                                     # Install dependenci
 mv .env.example .env                                        # Rename .env.example to .env
 psql -U user -h host -d database_name -f src/sql/init.sql   # Run init.sql file to setup database
 ```
-Then use your preferred text editor to edit the environment variables in `.env`. Once that is setup, you can run the bot:
+Then, use your preferred text editor to edit the environment variables in .env. When running the bot for the first time, you need to synchronize its slash commands with Discord. You can do this by running the bot with the **-s** or **--sync-slash-commands** flag:
 ```bash
-python main.py                                     # Run the bot
+python main.py -s                                # Run the bot and sync slash commands on start up
 ```
-
+You only need to do this **once** if you don't plan on adding any new commands. If you **do** add new slash commands later, you can use the `/sync` command within the bot or just re-run the bot with the sync flag. Otherwise, every other time you run the bot you **should not** use the flag:
+```bash
+python main.py                                   # Run the bot
+```
 ## Commands
 
 `/register` - Create a SpaceCases bank account    
@@ -49,3 +52,4 @@ python main.py                                     # Run the bot
 `/open` - Open a container    
 `/item` - View an item's information    
 `/containers` - View a list of all openable containers    
+`/sync` - Sync slash commands, can only be run by the user with id `OWNER_ID` in the `.env` file

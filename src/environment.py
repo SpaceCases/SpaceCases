@@ -32,6 +32,3 @@ class Environment:
             test_guild=os.environ.get("TEST_GUILD"),
             asset_domain=os.environ.get("ASSET_DOMAIN", DEFAULT_ASSET_DOMAIN),
         )
-
-
-environment = Environment.load()

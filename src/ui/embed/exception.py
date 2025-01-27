@@ -8,7 +8,9 @@ from src.exceptions import (
     UserDoesNotOwnItemError,
     UserInventoryEmptyError,
 )
-from src.logger import logger
+from src.logger import get_logger
+
+logger = get_logger(__name__)
 
 
 async def send_exception_embed(

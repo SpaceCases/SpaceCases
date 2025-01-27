@@ -1,12 +1,9 @@
-import discord
 import logging
 
 
-def _init_logging() -> logging.Logger:
-    discord.utils.setup_logging(root=False)
-
+def get_logger(name: str) -> logging.Logger:
     # Create logger
-    logger = logging.getLogger("SpaceCases")
+    logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -18,8 +15,5 @@ def _init_logging() -> logging.Logger:
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
-    logger.info("Logger initialised")
+    logger.info(f"Logger {name} initialised")
     return logger
-
-
-logger = _init_logging()

@@ -1,10 +1,12 @@
 import os
+from src.logger import get_logger
 import asyncpg
-from src.logger import logger
 from typing import Any, Self
 from asyncpg import Record
 from asyncpg.pool import PoolConnectionProxy
 from .types import ItemType
+
+logger = get_logger(__name__)
 
 # root folder for sql queries
 SQL_QUERIES_DIRECTORY = os.path.join("src", "sql")

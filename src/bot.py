@@ -2,7 +2,7 @@ import os
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
-from src.logger import logger
+from src.logger import get_logger
 from src.database import Database, COUNT_USERS
 from src.assets import (
     get_skin_metadata,
@@ -19,6 +19,8 @@ from spacecases_common import (
 )
 from collections.abc import Iterable
 from typing import Any, Optional
+
+logger = get_logger(__name__)
 
 
 class SpaceCasesCommandTree(app_commands.CommandTree):
@@ -63,7 +65,14 @@ class SpaceCasesCommandTree(app_commands.CommandTree):
 
 
 class SpaceCasesBot(commands.Bot):
-    def __init__(self, pool: Database, test_guild: Optional[str], owner_id: int):
+    def __init__(
+        self,
+        pool: Database,
+        asset_domain: str,
+        test_guild: Optional[str],
+        owner_id: int,
+        sync_slash_commands: bool,
+    ):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(
@@ -82,12 +91,18 @@ class SpaceCasesBot(commands.Bot):
         self.command_ids: dict[str, int] = {}
         self.status_int = 0
         self.user_count = 0
+        # environment variables
+        self.asset_domain = asset_domain
         self.test_guild = test_guild
         self.owner_id = owner_id
+        self.sync_slash_commands = sync_slash_commands
+
+    def get_asset_url(self, path: str) -> str:
+        return os.path.join(self.asset_domain, path)
 
     def refresh_item_metadata(self) -> None:
-        skin_metadata = get_skin_metadata()
-        sticker_metadata = get_sticker_metadata()
+        skin_metadata = get_skin_metadata(self.asset_domain)
+        sticker_metadata = get_sticker_metadata(self.asset_domain)
         self.item_metadata = skin_metadata | sticker_metadata
         self.item_unformatted_names = list(skin_metadata.keys()) + list(
             sticker_metadata.keys()
@@ -95,9 +110,9 @@ class SpaceCasesBot(commands.Bot):
         self.item_trie = Trie(self.item_unformatted_names)
 
     def refresh_containers(self) -> None:
-        skin_cases = get_skin_cases()
-        souvenir_packages = get_souvenir_packages()
-        sticker_capsules = get_sticker_capsules()
+        skin_cases = get_skin_cases(self.asset_domain)
+        souvenir_packages = get_souvenir_packages(self.asset_domain)
+        sticker_capsules = get_sticker_capsules(self.asset_domain)
         self.containers = skin_cases | souvenir_packages | sticker_capsules
         self.container_unformatted_names = (
             list(skin_cases.keys())
@@ -155,6 +170,10 @@ class SpaceCasesBot(commands.Bot):
 
     async def on_ready(self) -> None:
         self.bot_status_loop.start()
+        # sync slash commands only for the first time
+        if self.sync_slash_commands:
+            await self.sync_commands()
+            self.sync_slash_commands = False
         logger.info(f"Bot is logged in as {self.user}")
         logger.info("Bot is ready to receive commands - press CTRL+C to stop")
 

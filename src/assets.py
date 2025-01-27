@@ -8,27 +8,19 @@ from spacecases_common import (
     SouvenirPackage,
     StickerCapsule,
 )
-from src.environment import environment
-from src.logger import logger
+from src.logger import get_logger
 
-T_LOGO = os.path.join(environment.asset_domain, "static", "t.webp")
-CT_LOGO = os.path.join(environment.asset_domain, "static", "ct.webp")
+logger = get_logger(__name__)
 
-SKIN_METADATA_PATH = os.path.join(
-    environment.asset_domain, "generated", "skin_metadata.json"
-)
-STICKER_METADATA_PATH = os.path.join(
-    environment.asset_domain, "generated", "sticker_metadata.json"
-)
-SKIN_CASES_METADATA_PATH = os.path.join(
-    environment.asset_domain, "generated", "skin_cases.json"
-)
-STICKER_CAPSULE_METADATA_PATH = os.path.join(
-    environment.asset_domain, "generated", "sticker_capsules.json"
-)
-SOUVENIR_PACKAGE_METADATA_PATH = os.path.join(
-    environment.asset_domain, "generated", "souvenir_packages.json"
-)
+
+T_LOGO = os.path.join("static", "t.webp")
+CT_LOGO = os.path.join("static", "ct.webp")
+
+SKIN_METADATA_PATH = os.path.join("generated", "skin_metadata.json")
+STICKER_METADATA_PATH = os.path.join("generated", "sticker_metadata.json")
+SKIN_CASES_METADATA_PATH = os.path.join("generated", "skin_cases.json")
+STICKER_CAPSULE_METADATA_PATH = os.path.join("generated", "sticker_capsules.json")
+SOUVENIR_PACKAGE_METADATA_PATH = os.path.join("generated", "souvenir_packages.json")
 
 
 # Helper function to parse the raw JSON data into a dictionary of model instances
@@ -40,21 +32,37 @@ def parse_metadata[T: BaseModel](url: str, model: type[T]) -> dict[str, T]:
     return metadata
 
 
-def get_skin_metadata() -> dict[str, SkinMetadatum]:
-    return parse_metadata(SKIN_METADATA_PATH, SkinMetadatum)
+def parse_metadata_from_asset_domain[T: BaseModel](
+    asset_domain: str, url: str, model: type[T]
+) -> dict[str, T]:
+    return parse_metadata(os.path.join(asset_domain, url), model)
 
 
-def get_sticker_metadata() -> dict[str, StickerMetadatum]:
-    return parse_metadata(STICKER_METADATA_PATH, StickerMetadatum)
+def get_skin_metadata(asset_domain: str) -> dict[str, SkinMetadatum]:
+    return parse_metadata_from_asset_domain(
+        asset_domain, SKIN_METADATA_PATH, SkinMetadatum
+    )
 
 
-def get_skin_cases() -> dict[str, SkinCase]:
-    return parse_metadata(SKIN_CASES_METADATA_PATH, SkinCase)
+def get_sticker_metadata(asset_domain: str) -> dict[str, StickerMetadatum]:
+    return parse_metadata_from_asset_domain(
+        asset_domain, STICKER_METADATA_PATH, StickerMetadatum
+    )
 
 
-def get_souvenir_packages() -> dict[str, SouvenirPackage]:
-    return parse_metadata(SOUVENIR_PACKAGE_METADATA_PATH, SouvenirPackage)
+def get_skin_cases(asset_domain: str) -> dict[str, SkinCase]:
+    return parse_metadata_from_asset_domain(
+        asset_domain, SKIN_CASES_METADATA_PATH, SkinCase
+    )
 
 
-def get_sticker_capsules() -> dict[str, StickerCapsule]:
-    return parse_metadata(STICKER_CAPSULE_METADATA_PATH, StickerCapsule)
+def get_souvenir_packages(asset_domain: str) -> dict[str, SouvenirPackage]:
+    return parse_metadata_from_asset_domain(
+        asset_domain, SOUVENIR_PACKAGE_METADATA_PATH, SouvenirPackage
+    )
+
+
+def get_sticker_capsules(asset_domain: str) -> dict[str, StickerCapsule]:
+    return parse_metadata_from_asset_domain(
+        asset_domain, STICKER_CAPSULE_METADATA_PATH, StickerCapsule
+    )
