@@ -29,7 +29,7 @@ cd SpaceCases                                               # Move into director
 python -m venv env                                          # Create the virtual environment
 source env/bin/activate                                     # Activate virtual environment
 python -m pip install .                                     # Install dependencies
-mv .env.example .env                                        # Rename .env.example to .env
+cp .env.example .env                                        # Copy .env.example to .env
 psql -U user -h host -d database_name -f src/sql/init.sql   # Run init.sql file to setup database
 ```
 Then, use your preferred text editor to edit the environment variables in .env. When running the bot for the first time, you need to synchronize its slash commands with Discord. You can do this by running the bot with the **-s** or **--sync-slash-commands** flag:
