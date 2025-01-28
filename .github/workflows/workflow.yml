@@ -55,4 +55,5 @@ jobs:
             cd ~/SpaceCases
             git fetch origin
             git reset --hard origin/master
-            sudo systemctl restart spacecases
+            source env/bin/activate
+            python -m pip install .
