@@ -6,7 +6,7 @@ SpaceCases is a Discord bot for trading, unboxing, and collecting virtual CS2 sk
 
 Before running the bot, ensure that you have the following:
 
-- **Python 3.12+** installed on your machine.
+- [uv](https://github.com/astral-sh/uv) installed on your machine.
 - **PostgreSQL** with a database and an associated superuser account.
 - A **Discord bot user** setup with the necessary permissions:
   - **Create a Bot User**: Follow [this guide](https://discordpy.readthedocs.io/en/stable/discord.html) to create a Discord bot and obtain its token.
@@ -24,21 +24,20 @@ Once you've set up the bot user, you can proceed with running the bot as outline
 ## Running
 
 ```bash
+uv python install 3.12                                      # Install python 3.12
 git clone https://github.com/SpaceCases/SpaceCases          # Clone repository to local machine
 cd SpaceCases                                               # Move into directory
-python -m venv env                                          # Create the virtual environment
-source env/bin/activate                                     # Activate virtual environment
-python -m pip install .                                     # Install dependencies
+uv sync --python 3.12                                       # Create venv and install dependencies
 cp .env.example .env                                        # Copy .env.example to .env
 psql -U user -h host -d database_name -f src/sql/init.sql   # Run init.sql file to setup database
 ```
 Then, use your preferred text editor to edit the environment variables in .env. When running the bot for the first time, you need to synchronize its slash commands with Discord. You can do this by running the bot with the **-s** or **--sync-slash-commands** flag:
 ```bash
-python main.py -s                                # Run the bot and sync slash commands on start up
+uv run main.py -s                                # Run the bot and sync slash commands on start up
 ```
 You only need to do this **once** if you don't plan on adding any new commands. If you **do** add new slash commands later, you can use the `/sync` command within the bot or just re-run the bot with the sync flag. Otherwise, every other time you run the bot you **should not** use the flag:
 ```bash
-python main.py                                   # Run the bot
+uv run main.py                                   # Run the bot
 ```
 ## Commands
 
