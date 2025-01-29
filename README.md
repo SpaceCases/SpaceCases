@@ -39,6 +39,7 @@ You only need to do this **once** if you don't plan on adding any new commands. 
 ```bash
 uv run main.py                                   # Run the bot
 ```
+
 ## Commands
 
 `/register` - Create a SpaceCases bank account    
