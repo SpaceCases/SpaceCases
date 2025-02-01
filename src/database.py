@@ -1,10 +1,9 @@
 import os
-from src.logger import get_logger
 import asyncpg
 from typing import Any, Self
 from asyncpg import Record
 from asyncpg.pool import PoolConnectionProxy
-from spacecases_common import ItemType
+from spacecases_common import ItemType, get_logger
 
 logger = get_logger(__name__)
 

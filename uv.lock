@@ -511,23 +511,24 @@ requires-dist = [
     { name = "python-dotenv", specifier = "==1.0.1" },
     { name = "requests", specifier = "==2.32.3" },
     { name = "ruff", specifier = "==0.8.4" },
-    { name = "spacecases-common", specifier = "==0.12.0" },
+    { name = "spacecases-common", specifier = "==0.13.1" },
     { name = "types-requests", specifier = "==2.32.0.20241016" },
 ]
 
 [[package]]
 name = "spacecases-common"
-version = "0.12.0"
+version = "0.13.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "aiohttp" },
     { name = "discord-py" },
     { name = "mypy" },
     { name = "pydantic" },
     { name = "ruff" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/48/3c8b8d1c6addb0c7e6fc48be482bbef4066c897acecbdc0bbd90ae03606d/spacecases_common-0.12.0.tar.gz", hash = "sha256:abca032fef135608642f1885d5211806cf366fd9a41542666a9a539b729fbad8", size = 15962 }
+sdist = { url = "https://files.pythonhosted.org/packages/d3/43/8c5a1825084c2f5c6d93c1439556b7bb27700c802948a7c3fb3cded1f959/spacecases_common-0.13.1.tar.gz", hash = "sha256:d4cba32d71f0fede71046779f3cd014415d63bab76092f0027657b0cafac8278", size = 16683 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/22/59/baffddaa2462e4f61b6e539e38001785d137cfdb918bfc47c65b9e450068/spacecases_common-0.12.0-py3-none-any.whl", hash = "sha256:d6b54b57e4852fc3631f11f1fa5ecca0ae889f07eb7cf3395f5cb6f480d64632", size = 15226 },
+    { url = "https://files.pythonhosted.org/packages/be/df/3fb1e35880c06619b22b41e4ac0d0d6c88eeb7945859fa23b88ee1f020b4/spacecases_common-0.13.1-py3-none-any.whl", hash = "sha256:e154b8a811c4f66a5886cbf3a8d3070795890d808db5758be38771239a26fe0c", size = 15851 },
 ]
 
 [[package]]

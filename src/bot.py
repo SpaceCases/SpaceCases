@@ -2,20 +2,18 @@ import os
 import discord
 from discord.ext import commands, tasks
 from discord import app_commands
-from src.logger import get_logger
 from src.database import Database, COUNT_USERS
-from src.assets import (
-    get_skin_metadata,
-    get_sticker_metadata,
-    get_skin_cases,
-    get_souvenir_packages,
-    get_sticker_capsules,
-)
 from src.ui.embed import send_exception_embed
 from marisa_trie import Trie
 from spacecases_common import (
     ItemMetadatum,
     Container,
+    get_skin_metadata,
+    get_sticker_metadata,
+    get_skin_cases,
+    get_souvenir_packages,
+    get_sticker_capsules,
+    get_logger,
 )
 from collections.abc import Iterable
 from typing import Any, Optional
@@ -100,19 +98,19 @@ class SpaceCasesBot(commands.Bot):
     def get_asset_url(self, path: str) -> str:
         return os.path.join(self.asset_domain, path)
 
-    def refresh_item_metadata(self) -> None:
-        skin_metadata = get_skin_metadata(self.asset_domain)
-        sticker_metadata = get_sticker_metadata(self.asset_domain)
+    async def refresh_item_metadata(self) -> None:
+        skin_metadata = await get_skin_metadata(self.asset_domain)
+        sticker_metadata = await get_sticker_metadata(self.asset_domain)
         self.item_metadata = skin_metadata | sticker_metadata
         self.item_unformatted_names = list(skin_metadata.keys()) + list(
             sticker_metadata.keys()
         )
         self.item_trie = Trie(self.item_unformatted_names)
 
-    def refresh_containers(self) -> None:
-        skin_cases = get_skin_cases(self.asset_domain)
-        souvenir_packages = get_souvenir_packages(self.asset_domain)
-        sticker_capsules = get_sticker_capsules(self.asset_domain)
+    async def refresh_containers(self) -> None:
+        skin_cases = await get_skin_cases(self.asset_domain)
+        souvenir_packages = await get_souvenir_packages(self.asset_domain)
+        sticker_capsules = await get_sticker_capsules(self.asset_domain)
         self.containers = skin_cases | souvenir_packages | sticker_capsules
         self.container_unformatted_names = (
             list(skin_cases.keys())
@@ -123,8 +121,8 @@ class SpaceCasesBot(commands.Bot):
 
     @tasks.loop(hours=4)
     async def refresh_data_loop(self) -> None:
-        self.refresh_item_metadata()
-        self.refresh_containers()
+        await self.refresh_item_metadata()
+        await self.refresh_containers()
 
     @tasks.loop(seconds=10)
     async def bot_status_loop(self) -> None:

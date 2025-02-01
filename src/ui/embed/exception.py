@@ -8,7 +8,7 @@ from src.exceptions import (
     UserDoesNotOwnItemError,
     UserInventoryEmptyError,
 )
-from src.logger import get_logger
+from spacecases_common import get_logger
 
 logger = get_logger(__name__)
 
