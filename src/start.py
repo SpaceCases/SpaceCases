@@ -17,6 +17,7 @@ async def main(environment: Environment, sync_slash_commands: bool) -> None:
         bot = SpaceCasesBot(
             db,
             environment.asset_domain,
+            environment.leaderboards_domain,
             environment.test_guild,
             environment.owner_id,
             sync_slash_commands,

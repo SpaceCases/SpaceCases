@@ -126,11 +126,11 @@ wheels = [
 
 [[package]]
 name = "certifi"
-version = "2024.12.14"
+version = "2025.1.31"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0f/bd/1d41ee578ce09523c81a15426705dd20969f5abf006d1afe8aeff0dd776a/certifi-2024.12.14.tar.gz", hash = "sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db", size = 166010 }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/ab/c9f1e32b7b1bf505bf26f0ef697775960db7932abeb7b516de930ba2705f/certifi-2025.1.31.tar.gz", hash = "sha256:3d5da6925056f6f18f119200434a4780a94263f10d1c21d032a6f6b2baa20651", size = 167577 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a5/32/8f6669fc4798494966bf446c8c4a162e0b5d893dff088afddf76414f70e1/certifi-2024.12.14-py3-none-any.whl", hash = "sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56", size = 164927 },
+    { url = "https://files.pythonhosted.org/packages/38/fc/bce832fd4fd99766c04d1ee0eead6b0ec6486fb100ae5e74c1d91292b982/certifi-2025.1.31-py3-none-any.whl", hash = "sha256:ca78db4565a652026a4db2bcdf68f2fb589ea80d0be70e03929ed730746b84fe", size = 166393 },
 ]
 
 [[package]]
@@ -489,6 +489,7 @@ name = "spacecases"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "aiohttp" },
     { name = "asyncpg" },
     { name = "asyncpg-stubs" },
     { name = "discord-py" },
@@ -503,6 +504,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "aiohttp", specifier = "==3.11.11" },
     { name = "asyncpg", specifier = "==0.30.0" },
     { name = "asyncpg-stubs", specifier = "==0.30.0" },
     { name = "discord-py", specifier = "==2.4.0" },
@@ -511,13 +513,13 @@ requires-dist = [
     { name = "python-dotenv", specifier = "==1.0.1" },
     { name = "requests", specifier = "==2.32.3" },
     { name = "ruff", specifier = "==0.8.4" },
-    { name = "spacecases-common", specifier = "==0.13.1" },
+    { name = "spacecases-common", specifier = "==0.14.2" },
     { name = "types-requests", specifier = "==2.32.0.20241016" },
 ]
 
 [[package]]
 name = "spacecases-common"
-version = "0.13.1"
+version = "0.14.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiohttp" },
@@ -526,9 +528,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "ruff" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d3/43/8c5a1825084c2f5c6d93c1439556b7bb27700c802948a7c3fb3cded1f959/spacecases_common-0.13.1.tar.gz", hash = "sha256:d4cba32d71f0fede71046779f3cd014415d63bab76092f0027657b0cafac8278", size = 16683 }
+sdist = { url = "https://files.pythonhosted.org/packages/18/22/7c0a50e53537fd351c4f506c08cea7c068fe0c0d66135a43e554dae0b67e/spacecases_common-0.14.2.tar.gz", hash = "sha256:ff58eca291ab84d9e76b3aa881bb2b28bbe95b9afcbb2f16e7734f3e098bf8ea", size = 16676 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/be/df/3fb1e35880c06619b22b41e4ac0d0d6c88eeb7945859fa23b88ee1f020b4/spacecases_common-0.13.1-py3-none-any.whl", hash = "sha256:e154b8a811c4f66a5886cbf3a8d3070795890d808db5758be38771239a26fe0c", size = 15851 },
+    { url = "https://files.pythonhosted.org/packages/53/49/14d275d760da6eedf79aef39a7695ffbe7fea1675b97fd8e4f83ff935389/spacecases_common-0.14.2-py3-none-any.whl", hash = "sha256:714ad1b1028d96f751234e97df1018434aa287650437cebeb90cb501f200d7ce", size = 15850 },
 ]
 
 [[package]]

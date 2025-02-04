@@ -15,6 +15,7 @@ from spacecases_common import (
     get_sticker_capsules,
     get_logger,
 )
+from src.leaderboard import Leaderboard
 from collections.abc import Iterable
 from typing import Any, Optional
 
@@ -67,6 +68,7 @@ class SpaceCasesBot(commands.Bot):
         self,
         pool: Database,
         asset_domain: str,
+        leaderboards_domain: str,
         test_guild: Optional[str],
         owner_id: int,
         sync_slash_commands: bool,
@@ -91,9 +93,13 @@ class SpaceCasesBot(commands.Bot):
         self.user_count = 0
         # environment variables
         self.asset_domain = asset_domain
+        self.leaderboards_domain = leaderboards_domain
         self.test_guild = test_guild
         self.owner_id = owner_id
         self.sync_slash_commands = sync_slash_commands
+        # leaderboards
+        self.global_leaderboard = Leaderboard({})
+        self.guild_leaderboards: dict[int, Leaderboard] = {}
 
     def get_asset_url(self, path: str) -> str:
         return os.path.join(self.asset_domain, path)
@@ -119,7 +125,7 @@ class SpaceCasesBot(commands.Bot):
         )
         self.container_trie = Trie(self.container_unformatted_names)
 
-    @tasks.loop(hours=4)
+    @tasks.loop(minutes=15)
     async def refresh_data_loop(self) -> None:
         await self.refresh_item_metadata()
         await self.refresh_containers()
@@ -137,6 +143,16 @@ class SpaceCasesBot(commands.Bot):
                     )
                 )
 
+    @tasks.loop(minutes=5)
+    async def refresh_leaderboards_loop(self) -> None:
+        self.global_leaderboard = await Leaderboard.from_remote_json(
+            self.leaderboards_domain
+        )
+        async for guild in self.fetch_guilds():
+            self.guild_leaderboards[guild.id] = await Leaderboard.from_remote_json(
+                self.leaderboards_domain, guild.id
+            )
+
     async def close(self) -> None:
         if self.user:
             logger.info(f"Goodbye from {self.user}")
@@ -149,6 +165,7 @@ class SpaceCasesBot(commands.Bot):
         for command in await self.tree.fetch_commands():
             self.command_ids[command.name] = command.id
         self.refresh_data_loop.start()
+        self.refresh_leaderboards_loop.start()
 
     async def sync_commands(self) -> None:
         if self.test_guild is not None:

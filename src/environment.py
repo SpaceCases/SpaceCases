@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from dataclasses import dataclass
 
 DEFAULT_ASSET_DOMAIN = "https://assets.spacecases.xyz"
+DEFAULT_LEADERBOARDS_DOMAIN = "https://leaderboards.spacecases.xyz"
 
 
 @dataclass
@@ -17,6 +18,7 @@ class Environment:
     db_name: str
     test_guild: Optional[str]
     asset_domain: str
+    leaderboards_domain: str
 
     @staticmethod
     def load() -> "Environment":
@@ -31,4 +33,7 @@ class Environment:
             db_name=os.environ["DB_NAME"],
             test_guild=os.environ.get("TEST_GUILD"),
             asset_domain=os.environ.get("ASSET_DOMAIN", DEFAULT_ASSET_DOMAIN),
+            leaderboards_domain=os.environ.get(
+                "LEADERBOARDS_DOMAIN", DEFAULT_LEADERBOARDS_DOMAIN
+            ),
         )
