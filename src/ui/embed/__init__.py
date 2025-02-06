@@ -7,6 +7,7 @@ from .general import (
 )
 from .yes_no import yes_no_embed
 from .exception import send_exception_embed
+from .paginated_embed import send_paginated_embed
 
 __all__ = [
     "send_err_embed",
@@ -16,4 +17,5 @@ __all__ = [
     "get_rarity_embed_color",
     "yes_no_embed",
     "send_exception_embed",
+    "send_paginated_embed",
 ]

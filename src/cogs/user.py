@@ -7,7 +7,8 @@ from src.commands.user.balance import balance
 from src.commands.user.transfer import transfer
 from src.commands.user.claim import claim
 from src.commands.user import inventory, sell
-from typing import Optional
+from src.commands.user.leaderboard import leaderboard
+from typing import Optional, Literal
 
 
 class User(commands.Cog):
@@ -89,6 +90,21 @@ class User(commands.Cog):
         self, interaction: discord.Interaction, current: str
     ) -> list[discord.app_commands.Choice]:
         return await sell.item_id_autocomplete(self.bot, interaction, current)
+
+    @discord.app_commands.command(
+        name="leaderboard",
+        description="View a leaderboard.",
+    )
+    @discord.app_commands.describe(
+        type="Whether to view the global or server leaderboard"
+    )
+    async def leaderboard(
+        self,
+        interaction: discord.Interaction,
+        type: Literal["global", "local"] = "local",
+        page: int = 1,
+    ) -> None:
+        await leaderboard(self.bot, interaction, type, page)
 
 
 async def setup(bot: SpaceCasesBot) -> None:

@@ -12,6 +12,7 @@ Before running the bot, ensure that you have the following:
   - **Create a Bot User**: Follow [this guide](https://discordpy.readthedocs.io/en/stable/discord.html) to create a Discord bot and obtain its token.
   - **Intents**: The bot uses the following privileged intents:
       - `Message Content`
+      - `Server Members`
   - **Generating the Bot Invite Link**:
       - Use the following [scopes](https://discord.com/developers/docs/topics/oauth2#shared-resources-oauth2-scopes) when generating the invite link for the bot:
         - `bot`

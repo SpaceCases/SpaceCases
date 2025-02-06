@@ -11,6 +11,7 @@ logger = get_logger(__name__)
 class LeaderboardEntry:
     inventory_value: int
     position: int
+    name: str
 
 
 class Leaderboard:
@@ -36,10 +37,16 @@ class Leaderboard:
                     data = await response.json()
                     for key, val in data.items():
                         entries[int(key)] = LeaderboardEntry(
-                            val["inventory_value"], val["place"]
+                            val["inventory_value"], val["place"], val["username"]
                         )
                 elif response.status == 404:
                     entries = {}
                 else:
                     response.raise_for_status()
         return Leaderboard(entries)
+
+    def __str__(self) -> str:
+        return str(self.entries)
+
+    def __len__(self) -> int:
+        return len(self.users)
