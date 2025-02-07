@@ -26,7 +26,7 @@ async def leaderboard(
     elif type == "local":
         if not interaction.guild:
             await send_err_embed(
-                interaction, "You **must** run this command in a **guild**"
+                interaction, "You can only access a local leaderboard in a **guild**"
             )
             return
         leaderboard = bot.guild_leaderboards.get(interaction.guild.id, Leaderboard({}))

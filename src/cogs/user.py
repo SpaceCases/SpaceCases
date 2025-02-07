@@ -8,6 +8,7 @@ from src.commands.user.transfer import transfer
 from src.commands.user.claim import claim
 from src.commands.user import inventory, sell
 from src.commands.user.leaderboard import leaderboard
+from src.commands.user.ranking import ranking
 from typing import Optional, Literal
 
 
@@ -105,6 +106,19 @@ class User(commands.Cog):
         page: int = 1,
     ) -> None:
         await leaderboard(self.bot, interaction, type, page)
+
+    @discord.app_commands.command(
+        name="ranking", description="View your ranking on a leaderboard"
+    )
+    @discord.app_commands.describe(
+        type="Whether to view your ranking on the global or server leaderboard"
+    )
+    async def ranking(
+        self,
+        interaction: discord.Interaction,
+        type: Literal["global", "local"] = "local",
+    ) -> None:
+        await ranking(self.bot, interaction, type)
 
 
 async def setup(bot: SpaceCasesBot) -> None:

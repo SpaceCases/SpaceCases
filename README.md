@@ -53,4 +53,6 @@ uv run main.py                                   # Run the bot
 `/open` - Open a container    
 `/item` - View an item's information    
 `/containers` - View a list of all openable containers    
+`/leaderboard` - View a leaderboard
+`/ranking` - View your position on a leaderboard   
 `/sync` - Sync slash commands, can only be run by the user with id `OWNER_ID` in the `.env` file
