@@ -62,6 +62,7 @@ async def leaderboard(
                 f"**{elem.position}**) {elem.name} - **{currency_str_format(elem.inventory_value)}**"
             )
         e.description = "\n".join(lines)
+        e.set_footer(text="Leaderboards update every 5 minutes")
         embeds.append(e)
 
     await send_paginated_embed(interaction, embeds, page)
